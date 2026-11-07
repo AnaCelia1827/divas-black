@@ -16,7 +16,7 @@ Aplicativo operacional para Carina organizar clientes, atendimentos, caixa e mat
 | RF08 | Registrar reembolso vinculado ao atendimento sem apagar o pagamento original. |
 | RF09 | Cadastrar materiais com unidade, saldo inicial e mínimo; registrar compra, uso e ajuste. |
 | RF10 | Gerar lista de compra pela agenda e saldo, somar demanda manual editável e manter Pomada/Mousse sempre visíveis, mesmo sem falta. |
-| RF11 | Mostrar sugestão simulada da assistente; revisar os campos e confirmar uma única vez. |
+| RF11 | Analisar mensagem colada no assistente com Groq, preservar o original, revisar cliente/data/horário/local/serviço/total/entrada/final e confirmar uma única vez. Campos ausentes exigem revisão; confirmação não registra pagamentos. |
 | RF12 | Salvar demonstração no navegador ou, quando configurado, em banco compartilhado Supabase. |
 | RF13 | Funcionar em celular e computador com navegação curta, números grandes e ações rápidas. |
 | RF14 | Baixar PDF da lista de compra do período no navegador, incluindo demanda automática, manual e materiais fixos, sem envio para geração externa. |
@@ -50,7 +50,7 @@ Aplicativo operacional para Carina organizar clientes, atendimentos, caixa e mat
 
 ## Fora desta entrega
 
-Login, perfis de equipe, integração real de WhatsApp, agente de IA real, processamento bancário, comissões, obrigações tributárias, formação social e contabilidade completa. Sugestões da assistente e registros de exemplo são fictícios. O módulo externo da outra integrante da equipe deve respeitar o mesmo contrato e as mesmas regras.
+Login, perfis de equipe, integração automática de WhatsApp, processamento bancário, comissões, obrigações tributárias, formação social e contabilidade completa. Registros de exemplo são fictícios. A análise por IA é real quando a chave Groq está configurada; usa somente o texto enviado no próprio software. Módulos externos devem respeitar o mesmo contrato e as mesmas regras.
 
 ## Critérios de aceite
 

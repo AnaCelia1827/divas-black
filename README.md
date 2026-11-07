@@ -1,6 +1,6 @@
 # Divas Black
 
-Software de gestão do salão: agenda em post-its, clientes, serviços, caixa e materiais. Interface em português, responsiva, com preto e rosa forte. A primeira versão funciona sem login e usa dados fictícios; WhatsApp e assistente são simulações revisáveis.
+Software de gestão do salão: agenda em post-its, clientes, serviços, caixa e materiais. Interface em português, responsiva, com preto e rosa forte. A demonstração funciona sem login e inicia com dados fictícios. O assistente analisa mensagens coladas no software pela IA da Groq e gera rascunhos revisáveis.
 
 Custos entram de duas formas: “Adicionar custo” registra uma despesa paga do salão; o cadastro de serviço e o atendimento permitem custo estimado. A estimativa fica preservada no histórico e não cria despesa automática no caixa.
 
@@ -23,7 +23,18 @@ npm run dev
 
 Abra `http://localhost:3000`. No Windows/PowerShell com scripts bloqueados, use `npm.cmd` no lugar de `npm`.
 
-O modo padrão salva no navegador e funciona sem conta, credenciais ou configuração de banco. Os dados de exemplo são gerados relativamente à data local do primeiro uso e depois preservados. A demonstração local não sincroniza entre dispositivos.
+O modo padrão salva no navegador e funciona sem conta, credenciais ou configuração de banco. A análise de texto por IA requer a chave descrita abaixo. Os dados de exemplo são gerados relativamente à data local do primeiro uso e depois preservados. A demonstração local não sincroniza entre dispositivos.
+
+## Assistente por mensagem de texto
+
+1. Configure `GROQ_API_KEY` em `.env.local`, na raiz. `GROQ_MODEL=openai/gpt-oss-20b` é o padrão. A chave fica somente no servidor, sem prefixo `NEXT_PUBLIC_`. Reinicie o servidor depois de configurar.
+2. Abra **Assistente**, cole a mensagem ou toque em **Usar exemplo** e depois **Organizar mensagem**. O texto é enviado à Groq para análise; não é necessário configurar Meta, webhook ou outro número.
+3. Confira cliente, data, horário, local, serviço, total, entrada e valor final. Campos ausentes ficam vazios; datas sem ano não são completadas automaticamente. Escolha cadastros existentes ou crie cliente/serviço na confirmação, preservando o procedimento mencionado.
+4. Complete o horário e revise a duração antes de **Confirmar atendimento na agenda**. O exemplo de Maria informa R$ 200 de total, R$ 80 de entrada e R$ 120 no final, mas não informa horário. A duração inicial de 60 minutos para um serviço novo é editável e precisa ser conferida.
+
+O texto original e a extração ficam salvos como rascunho no mesmo armazenamento do aplicativo. A confirmação salva cliente/serviço novos e atendimento de forma atômica; conflitos de agenda preservam o rascunho sem cadastros parciais. Entrada e valor final são condições combinadas, sem lançamentos automáticos no caixa. Registre o recebimento quando acontecer. Se a IA falhar, o texto permanece no campo; se somente a gravação falhar, tente salvar o mesmo rascunho sem outra análise.
+
+A chamada usa [saída estruturada da Groq](https://console.groq.com/docs/structured-outputs), validada no servidor, com limite de 4.000 caracteres e tempo limite. O software ainda contém rascunhos fictícios identificados como demonstração. A aplicação continua sem autenticação; configure controle de acesso antes de expor dados reais e consumo de IA publicamente.
 
 ## Banco compartilhado: Supabase
 
@@ -62,7 +73,7 @@ npm test
 npm run build
 ```
 
-A suíte automatizada cobre separação de previsto/recebido, pagamentos parciais, reembolso, conflitos de agenda, custos estimados sem impacto no caixa, snapshots históricos, demanda manual e itens fixos da lista de compra, geração de PDF, exportação financeira XLSX com fórmulas/resultados salvos e roundtrip, atualização atômica de compra/caixa, persistência, validação e concorrência. Também verifica rotas da API, carregamento e erros do hook, navegação e formulários em DOM simulado, incluindo cadastro de cliente durante o agendamento. Testes de banco usam armazenamento simulado com compare-and-swap; nenhuma conexão real é presumida. O PDF foi renderizado com PyMuPDF e inspecionado separadamente. Testes de DOM/HTTP não substituem validação visual por screenshots da interface final no navegador, que não foi realizada.
+A suíte automatizada cobre separação de previsto/recebido, pagamentos parciais, reembolso, conflitos de agenda, custos estimados sem impacto no caixa, snapshots históricos, demanda manual e itens fixos da lista de compra, geração de PDF, exportação financeira XLSX com fórmulas/resultados salvos e roundtrip, atualização atômica de compra/caixa, persistência, validação e concorrência. Também verifica rotas da API, carregamento e erros do hook, navegação e formulários em DOM simulado, incluindo extração por texto, campos ausentes, soma de parcelas, falhas da IA e confirmação atômica sem recebimento automático. Testes de banco usam armazenamento simulado com compare-and-swap; nenhuma conexão real é presumida. O PDF foi renderizado e inspecionado em etapa anterior. O assistente por texto também foi validado no Chrome com a Groq real: exemplo de Maria, horário pendente, confirmação e persistência após recarregar, sem lançamento no caixa. A tela foi inspecionada em 1440 px e 390 px, sem rolagem horizontal no celular. Isso não valida todas as outras telas nem uma implantação de produção.
 
 ## Documentação
 

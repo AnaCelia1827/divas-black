@@ -9,7 +9,7 @@ Carina, profissional de tranças e cuidados capilares. Precisa organizar o salã
 ## Product Purpose
 Conectar agenda, clientes, serviços, recebimentos, despesas e materiais com poucos passos e linguagem simples.
 ## Capabilities and Constraints
-Sem autenticação nesta demonstração. Apenas dados fictícios. WhatsApp e IA simulados; integração real fica com outra pessoa. Persistência Supabase e adaptador demo local. Uma profissional inicialmente. Compra paga gera estoque e despesa; recebimento depende de confirmação.
+Sem autenticação nesta demonstração. Inicia com dados fictícios. O assistente recebe texto colado no software e usa a Groq para organizar um rascunho revisável; mensagens não são coletadas automaticamente do WhatsApp. Persistência Supabase e adaptador demo local. Uma profissional inicialmente. Compra paga gera estoque e despesa; recebimento depende de confirmação. Entrada e saldo combinados em texto não são pagamentos realizados.
 
 Custo real é lançado por “Adicionar custo”; estimativas por serviço/atendimento ficam no histórico e não geram caixa. A lista de compras soma agenda e demanda manual, mantém Pomada/Mousse visíveis e pode ser baixada em PDF gerado localmente, sem transmissão dos dados para conversão externa.
 

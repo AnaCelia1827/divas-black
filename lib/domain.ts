@@ -1,6 +1,7 @@
 import type { AppData, Appointment, Command, FinancialSummary, Material } from './types';
 import { dateSchema, parseCommand } from './validation';
 import { ensureFixedMaterials } from './fixed-materials';
+import { paymentWarning, textDraftNotes } from './text-draft';
 
 export function getAppointmentPaid(data: AppData, id: string): number {
   return data.cashMovements.filter(item => item.appointmentId === id).reduce((total, item) => total + (item.direction === 'in' ? item.amountCents : -item.amountCents), 0);
@@ -53,6 +54,29 @@ export function applyCommand(input: AppData, rawCommand: Command, now = new Date
     return item;
   };
   switch (command.type) {
+    case 'saveTextDraft': {
+      if (data.drafts.some(draft => draft.id === command.draft.id)) throw new Error('Esse rascunho já foi salvo.');
+      data.drafts.push(structuredClone(command.draft));
+      break;
+    }
+    case 'confirmTextDraft': {
+      const draft = data.drafts.find(item => item.id === command.draftId);
+      if (!draft?.extraction) throw new Error('Rascunho de texto não encontrado.');
+      if (draft.confirmedAppointmentId) throw new Error('Essa sugestão já foi confirmada.');
+      const { appointment, client, service, review } = command;
+      if (appointment.clientId !== client.id || appointment.serviceId !== service.id || appointment.draftId !== draft.id) throw new Error('Confira os cadastros vinculados ao rascunho.');
+      if (!review.clientName || !review.date || !review.time || !review.location || !review.serviceName || review.totalCents === null) throw new Error('Complete os dados do atendimento antes de agendar.');
+      if (localDate(appointment.startAt) !== review.date || new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' }).format(new Date(appointment.startAt)) !== review.time || appointment.priceCents !== review.totalCents) throw new Error('Confira a data, horário e valor da revisão.');
+      const warning = paymentWarning(review.totalCents, review.depositCents, review.finalCents);
+      if (warning) throw new Error(warning);
+      // Every change is applied to an isolated snapshot; a conflict saves none of them.
+      let next = data;
+      if (!next.clients.some(item => item.id === client.id)) next = applyCommand(next, { commandId: `${command.commandId.slice(0, 140)}:client`, type: 'saveClient', client }, now);
+      if (!next.services.some(item => item.id === service.id)) next = applyCommand(next, { commandId: `${command.commandId.slice(0, 140)}:service`, type: 'saveService', service }, now);
+      next = applyCommand(next, { commandId: command.commandId, type: 'saveAppointment', appointment: { ...appointment, notes: textDraftNotes(draft.message, review) } }, now);
+      next.drafts.find(item => item.id === draft.id)!.reviewed = review;
+      return next;
+    }
     case 'saveClient': {
       const previous = data.clients.find(item => item.id === command.client.id);
       const next = { ...command.client, createdAt: previous?.createdAt ?? createdAt };

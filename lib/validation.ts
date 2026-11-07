@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { AppData, Command } from './types';
 import { ensureFixedMaterials } from './fixed-materials';
+import { MAX_MESSAGE_LENGTH, textExtractionSchema } from './text-draft';
 
 const id = z.string().trim().min(1).max(160);
 const text = z.string().max(2000);
@@ -26,7 +27,10 @@ const cash = cashInput.extend({ origin: z.enum(['manual', 'payment', 'purchase',
 const material = z.object({ id, name, unit: name, quantity, minimum: quantity, active: z.boolean(), unitPriceCents: cents.optional(), manualDemand: quantity.optional(), alwaysOnShoppingList: z.boolean().optional() }).strict();
 const stock = z.object({ id: id.max(140), materialId: id, kind: z.enum(['purchase', 'consumption', 'adjustment']), quantity: z.number().finite().min(-1000000).max(1000000), date: dateSchema, notes: text, costCents: cents }).strict();
 const commandId = id;
+const assistantDraft = z.object({ id, clientName: z.string().trim().max(160), clientPhone: z.string().max(30), serviceId: z.string().max(160), startAt: timestamp.or(z.literal('')), priceCents: cents, notes: text, message: z.string().max(MAX_MESSAGE_LENGTH), extraction: textExtractionSchema.optional(), reviewed: textExtractionSchema.optional(), confirmedAppointmentId: id.optional() }).strict();
 const commandSchema = z.discriminatedUnion('type', [
+  z.object({ commandId, type: z.literal('saveTextDraft'), draft: assistantDraft.extend({ extraction: textExtractionSchema, confirmedAppointmentId: z.never().optional(), reviewed: z.never().optional() }) }).strict(),
+  z.object({ commandId, type: z.literal('confirmTextDraft'), draftId: id, client: clientInput, service, appointment: appointmentInput, review: textExtractionSchema }).strict(),
   z.object({ commandId, type: z.literal('saveClient'), client: clientInput }).strict(),
   z.object({ commandId, type: z.literal('saveService'), service }).strict(),
   z.object({ commandId, type: z.literal('saveAppointment'), appointment: appointmentInput }).strict(),
@@ -36,7 +40,7 @@ const commandSchema = z.discriminatedUnion('type', [
   z.object({ commandId, type: z.literal('saveMaterial'), material }).strict(),
   z.object({ commandId, type: z.literal('recordStock'), movement: stock }).strict(),
 ]);
-const appDataSchema = z.object({ schemaVersion: z.literal(1), clients: z.array(client).max(20000), services: z.array(service).max(1000), appointments: z.array(appointment).max(100000), cashMovements: z.array(cash).max(200000), materials: z.array(material).max(10000), stockMovements: z.array(stock).max(100000), drafts: z.array(z.object({ id, clientName: name, clientPhone: z.string().max(30), serviceId: id, startAt: timestamp, priceCents: cents, notes: text, message: text, confirmedAppointmentId: id.optional() }).strict()).max(10000), appliedCommandIds: z.array(id).max(500000) }).strict();
+const appDataSchema = z.object({ schemaVersion: z.literal(1), clients: z.array(client).max(20000), services: z.array(service).max(1000), appointments: z.array(appointment).max(100000), cashMovements: z.array(cash).max(200000), materials: z.array(material).max(10000), stockMovements: z.array(stock).max(100000), drafts: z.array(assistantDraft).max(10000), appliedCommandIds: z.array(id).max(500000) }).strict();
 
 export function parseCommand(input: unknown): Command {
   const result = commandSchema.safeParse(input);

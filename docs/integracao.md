@@ -16,7 +16,7 @@ O frontend usa `AppRepository` (`load()` e `execute(command)`) de `lib/types.ts`
 
 `POST /api/data` aceita um `Command` e responde `{ data: AppData }`. No modo local, o browser usa diretamente o repositório de demonstração e o POST é recusado. Erros retornam `{ error: string }`, com status apropriado; nunca tratar falha de persistência como sucesso.
 
-Tipos de comandos: `saveClient`, `saveService`, `saveAppointment`, `setAppointmentStatus`, `recordCash`, `refund`, `saveMaterial`, `recordStock`. Consulte a união discriminada em `lib/types.ts`; campos extras e valores inválidos são recusados.
+Tipos de comandos: `saveClient`, `saveService`, `saveAppointment`, `setAppointmentStatus`, `recordCash`, `refund`, `saveMaterial`, `recordStock`, `saveTextDraft`, `confirmTextDraft`. Consulte a união discriminada em `lib/types.ts`; campos extras e valores inválidos são recusados.
 
 `Service.costCents` e `Appointment.costCents` são custos estimados opcionais, em centavos inteiros não negativos. O atendimento copia o custo do serviço ao ser criado e preserva seu valor ao remarcar; custo explícito enviado pelo formulário prevalece. Alterar custo no cadastro do serviço não reescreve snapshots anteriores. Dados antigos sem esses campos continuam válidos no schema 1, sem migração SQL. Estimativas não produzem `CashMovement`: a ação “Adicionar custo” registra despesa paga com `recordCash`, direção `out`, enquanto uma compra paga usa `recordStock` e cria sua saída automaticamente.
 
@@ -42,11 +42,15 @@ Exemplo de recebimento, valores em centavos:
 
 Use o mesmo `commandId` ao repetir uma requisição cujo resultado se perdeu. O ID é armazenado na mesma transação do efeito. IDs de lançamentos não podem ser reutilizados com outro comando. Para novos eventos, gere IDs novos.
 
-## Integração futura da assistente
+## Assistente por texto
 
-A versão entregue apresenta um `AssistantDraft` fictício e revisável. Não existe chamada real para IA/WhatsApp nem endpoint de webhook. O draft contém cliente, telefone, serviço, instante com timezone, preço, observação e mensagem de origem; confirmação registra `confirmedAppointmentId`.
+`POST /api/assistant/extract` aceita `{ "message": "texto do atendimento" }` e responde `{ "extraction": TextExtraction }`. Limite de 4.000 caracteres e 24 KB no corpo lido, verificação de origem, timeout de 30 segundos na Groq e resposta sem cache. Configuração exclusiva do servidor: `GROQ_API_KEY` e `GROQ_MODEL` (padrão `openai/gpt-oss-20b`). Não depende de API do WhatsApp, número, webhook, túnel nem servidor Express separado.
 
-Para a API externa, mapear a conversa para rascunho e permitir revisão. A mensagem de uma cliente dizendo que pagará não autoriza `recordCash`. Não confirmar datas ambíguas automaticamente. Acrescentar ingestão de rascunhos validada na API externa antes de conectar o agente real; o MVP não oferece uma gravação pública irrestrita de `AppData`.
+`TextExtraction` em `lib/text-draft.ts` contém `clientName`, `dateText`, `date` (`AAAA-MM-DD`), `time` (`HH:mm`), `location`, `serviceName`, `totalCents`, `depositCents`, `finalCents` e `warnings`. Campos ausentes são `null`; valores monetários são centavos inteiros. A saída estruturada da Groq inclui trechos literais de evidência, conferidos no servidor antes da resposta. Não supõe ano, horário, endereço, parcelas ausentes ou equivalência entre procedimentos. Evidências inválidas deixam o campo nulo e acrescentam pendência. Falha da IA retorna erro explícito; não simula extração.
+
+`saveTextDraft` grava um `AssistantDraft` com mensagem original e `extraction`, sem criar cadastros, atendimento ou caixa. `startAt` vazio é permitido nesse rascunho incompleto; o timestamp de atendimento continua obrigatório. O mesmo `commandId` é reutilizado após falha de gravação. Os rascunhos antigos de demonstração continuam compatíveis.
+
+`confirmTextDraft` recebe `draftId`, `client`, `service`, `appointment` e `review`. A revisão exige nome/data/horário/local/serviço/total e confere a soma quando entrada e final estão presentes. Cria somente cadastros inexistentes, preservando os existentes, verifica conflitos e salva tudo no mesmo snapshot; a falha não grava cadastros parciais. Grava `reviewed` e `confirmedAppointmentId`, preservando mensagem e extração originais. Local, procedimento mencionado e condições de pagamento ficam também nas observações do atendimento. A mensagem pode ter 4.000 caracteres; a cópia nas observações tem o limite de 2.000, com original integral no rascunho. Nenhuma confirmação cria `CashMovement`. O recebimento usa a ação explícita de caixa existente.
 
 ## Exportação e preferências locais
 
@@ -74,4 +78,4 @@ RLS bloqueia `anon` e `authenticated`; somente o servidor usa chave secret/servi
 
 Testes de domínio, armazenamento local e concorrência usam memória/mock. Eles não validam uma instância real do Supabase nem a aplicação da migração. A conexão real exige configurar projeto, SQL e variáveis e executar o fluxo de aceite no ambiente conectado.
 
-A suíte automatizada inclui geração de PDF e testes de interface em DOM simulado. O PDF foi renderizado com PyMuPDF e inspecionado. Isso não equivale a validação visual da aplicação em navegador; screenshots finais da interface não foram obtidos.
+A suíte automatizada inclui geração de PDF, extração de texto com evidências, validação de campos e valores, confirmação atômica, idempotência e testes de interface em DOM simulado. O assistente por texto foi também testado no Chrome com a Groq real e dados fictícios: o exemplo de Maria gerou 07/11/2026, local salão, trança boxeadora, total/entrada/final de 20000/8000/12000 centavos e horário pendente. Após completar o horário, o atendimento foi confirmado e persistiu ao recarregar, sem alteração do caixa. Screenshots desta tela foram inspecionados em 1440 px e 390 px, sem overflow horizontal. Isso não valida todas as telas, um banco real nem uma implantação de produção. O PDF foi renderizado e inspecionado em etapa anterior.
