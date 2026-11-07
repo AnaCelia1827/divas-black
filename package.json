@@ -10,6 +10,7 @@
     "dev": "node scripts/run-instance.mjs demo dev 3000",
     "dev:demo": "node scripts/run-instance.mjs demo dev 3000",
     "preview:supabase": "node scripts/run-instance.mjs supabase start 3001",
+    "check:supabase": "node scripts/check-supabase.mjs",
     "build": "next build",
     "start": "next start --hostname 0.0.0.0",
     "typecheck": "tsc --noEmit",

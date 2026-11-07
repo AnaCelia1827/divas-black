@@ -34,6 +34,10 @@ O modo padrão salva no navegador e funciona sem conta, credenciais ou configura
 
 Nunca exponha a chave como `NEXT_PUBLIC_*`. Não envie `.env.local` ao Git. Se o banco configurado falhar, a aplicação mostra erro; não troca silenciosamente por armazenamento local.
 
+Use `npm run check:supabase` para verificar a configuração atual, consultar a tabela e checar a permissão da função de gravação sem modificar registros. O diagnóstico exibe apenas o tipo da chave, status e código de erro; nunca o segredo ou os dados do salão. A chave Publishable não acessa a tabela privada deste projeto. Corrija `SUPABASE_SECRET_KEY` no arquivo `.env.local` da raiz, usando uma chave Secret do mesmo projeto de `SUPABASE_URL`.
+
+As skills oficiais `supabase` e `supabase-postgres-best-practices` estão instaladas em `.agents/skills`, com origem registrada em `skills-lock.json`, usando `npx skills add supabase/agent-skills --agent codex --yes`. Elas fornecem instruções para o agente; não concedem credenciais nem autenticam a aplicação. [Repositório oficial](https://github.com/supabase/agent-skills).
+
 ### Duas instâncias locais
 
 - Demonstração: `npm run dev:demo` → `http://localhost:3000`, com dados neste navegador.
