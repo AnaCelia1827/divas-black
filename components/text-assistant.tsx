@@ -75,14 +75,21 @@ function Review({ draft, data, busy, execute }: Omit<Props, 'open'> & { draft: A
  const [amounts, setAmounts] = useState({ totalCents: moneyValue(original.totalCents), depositCents: moneyValue(original.depositCents), finalCents: moneyValue(original.finalCents) });
  const [clientId, setClientId] = useState(() => { const matches = data.clients.filter(client => client.active && normalize(client.name) === normalize(original.clientName || '')); return matches.length === 1 ? matches[0].id : '__new__'; });
  const [serviceId, setServiceId] = useState(() => { const matches = data.services.filter(service => service.active && normalize(service.name) === normalize(original.serviceName || '')); return matches.length === 1 ? matches[0].id : '__new__'; });
+ const availableServices = data.services.filter(service => service.active).slice().sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
  const selectedService = data.services.find(service => service.id === serviceId);
  const [duration, setDuration] = useState(selectedService?.durationMinutes ?? 60);
  const [error, setError] = useState('');
  const [ids] = useState(() => ({ client: uid(), service: uid(), appointment: uid(), command: uid() }));
  const lock = useRef(false);
  const set = (key: keyof TextExtraction, value: string | number | null) => { setFields(previous => ({ ...previous, [key]: value })); setError(''); };
+ const chooseService = (id: string) => {
+  setServiceId(id);
+  const service = availableServices.find(item => item.id === id);
+  set('serviceName', service?.name ?? original.serviceName);
+  setDuration(service?.durationMinutes ?? 60);
+ };
  const warning = paymentWarning(fields.totalCents, fields.depositCents, fields.finalCents);
- const complete = !!(fields.clientName?.trim() && fields.date && fields.time && fields.location?.trim() && fields.serviceName?.trim() && fields.totalCents !== null);
+ const complete = !!(fields.clientName?.trim() && fields.date && fields.time && fields.location?.trim() && fields.serviceName?.trim() && fields.totalCents !== null && (serviceId === '__new__' || selectedService?.active));
  async function confirm(event: FormEvent) {
   event.preventDefault(); if (lock.current || busy || !complete || warning) return;
   lock.current = true; setError('');
@@ -101,18 +108,20 @@ function Review({ draft, data, busy, execute }: Omit<Props, 'open'> & { draft: A
  return <form className="text-review" onSubmit={confirm} aria-label={`Revisão de ${original.clientName || 'atendimento'}`}>
   <h3>Confira e complete o atendimento</h3>
   {original.warnings.length > 0 && <div className="text-pending"><strong>Pontos para conferir</strong><ul>{original.warnings.map((text, i) => <li key={i}>{text}</li>)}</ul></div>}
+  <p className="text-service-source">Serviço identificado na mensagem: <strong>{original.serviceName || 'Não informado'}</strong></p>
   <div className="text-review-grid">
    <label>Nome da cliente<input required maxLength={120} value={fields.clientName || ''} onChange={event => set('clientName', event.target.value || null)}/></label>
    <label>Cadastro da cliente<select value={clientId} onChange={event => setClientId(event.target.value)}><option value="__new__">Cadastrar esta cliente</option>{data.clients.filter(client => client.active).map(client => <option key={client.id} value={client.id}>{client.name}{client.phone ? ` · ${client.phone}` : ''}</option>)}</select></label>
    <label>Data do atendimento<input required type="date" value={fields.date || ''} onChange={event => set('date', event.target.value || null)}/></label>
    <label>Horário do atendimento<input required type="time" value={fields.time || ''} onChange={event => set('time', event.target.value || null)}/></label>
    <label>Local do atendimento<input required maxLength={160} value={fields.location || ''} onChange={event => set('location', event.target.value || null)}/></label>
-   <label>Serviço mencionado<input required maxLength={120} value={fields.serviceName || ''} onChange={event => set('serviceName', event.target.value || null)}/></label>
-   <label>Cadastro do serviço<select value={serviceId} onChange={event => { setServiceId(event.target.value); const service = data.services.find(item => item.id === event.target.value); if (service) setDuration(service.durationMinutes); }}><option value="__new__">Cadastrar este serviço</option>{data.services.filter(service => service.active).map(service => <option key={service.id} value={service.id}>{service.name}</option>)}</select></label>
+   <label>Serviço do atendimento<select value={serviceId} onChange={event => chooseService(event.target.value)}><option value="__new__">+ Cadastrar outro serviço</option>{availableServices.map(service => <option key={service.id} value={service.id}>{service.name} · {service.durationMinutes} min</option>)}</select></label>
+   {serviceId === '__new__' && <label>Nome do novo serviço<input required maxLength={120} value={fields.serviceName || ''} onChange={event => set('serviceName', event.target.value || null)}/></label>}
    <label>Duração · minutos<input required type="number" min="5" max="1440" step="5" value={duration} onChange={event => setDuration(Number(event.target.value))}/></label>
    {(['totalCents', 'depositCents', 'finalCents'] as const).map((key, index) => <label key={key}>{['Valor total · R$', 'Entrada combinada · R$', 'Valor final combinado · R$'][index]}<input type="number" inputMode="decimal" min="0" max="1000000" step="0.01" required={key === 'totalCents'} value={amounts[key]} onChange={event => { setAmounts(previous => ({ ...previous, [key]: event.target.value })); set(key, event.target.value === '' ? null : centsFromInput(event.target.value)); }}/></label>)}
   </div>
-  <p className="text-privacy">Horário de Brasília. Confira a duração e os cadastros escolhidos. Entrada e valor final são combinados; registre o recebimento no caixa quando acontecer.</p>
+  {!availableServices.length && <p className="text-privacy">Nenhum serviço ativo cadastrado. Informe o nome acima para cadastrar um serviço ao confirmar.</p>}
+  <p className="text-privacy">Ao selecionar um serviço, o valor combinado na mensagem é mantido. Horário de Brasília. Confira a duração e os cadastros escolhidos. Entrada e valor final são combinados; registre o recebimento no caixa quando acontecer.</p>
   {warning && <p className="inline-error" role="alert">{warning}</p>}
   {error && <p className="inline-error" role="alert">{error}</p>}
   <button className="button primary" type="submit" disabled={busy || !complete || !!warning}>Confirmar atendimento na agenda<ArrowRight size={18}/></button>

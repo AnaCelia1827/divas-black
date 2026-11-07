@@ -30,7 +30,7 @@ describe('assistente por texto', () => {
   expect((screen.getByLabelText('Valor total · R$') as HTMLInputElement).value).toBe('200.00');
   expect((screen.getByLabelText('Entrada combinada · R$') as HTMLInputElement).value).toBe('80.00');
   expect((screen.getByLabelText('Valor final combinado · R$') as HTMLInputElement).value).toBe('120.00');
-  expect((screen.getByLabelText('Cadastro do serviço') as HTMLSelectElement).value).toBe('__new__');
+  expect((screen.getByLabelText('Serviço do atendimento') as HTMLSelectElement).value).toBe('__new__');
   await user.type(hour, '20:00');
   const final = screen.getByLabelText('Valor final combinado · R$');
   await user.clear(final); await user.type(final, '130');
@@ -61,11 +61,45 @@ describe('assistente por texto', () => {
   await user.click(screen.getByRole('button', { name: 'Usar exemplo' })); await user.click(screen.getByRole('button', { name: 'Organizar mensagem' }));
   await screen.findByLabelText('Horário do atendimento');
   expect((screen.getByLabelText('Cadastro da cliente') as HTMLSelectElement).value).toBe(seed.clients[0].id);
+  expect((screen.getByLabelText('Serviço do atendimento') as HTMLSelectElement).value).toBe(seed.services[0].id);
   await user.click(screen.getByRole('button', { name: 'Confirmar atendimento na agenda' }));
   await screen.findByText('Atendimento adicionado à agenda');
   const [result, command] = saved.mock.calls[1];
   expect(command.client).not.toHaveProperty('createdAt');
   expect(result.clients).toHaveLength(seed.clients.length); expect(result.services).toHaveLength(seed.services.length);
+ });
+ it('seleciona serviço cadastrado, usa sua duração e preserva o preço combinado e a mensagem original', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ extraction: fields }))));
+  const user = userEvent.setup(); const saved = vi.fn(); render(<Harness saved={saved}/>);
+  await user.click(screen.getByRole('button', { name: 'Usar exemplo' })); await user.click(screen.getByRole('button', { name: 'Organizar mensagem' }));
+  const hour = await screen.findByLabelText('Horário do atendimento');
+  await user.selectOptions(screen.getByLabelText('Serviço do atendimento'), 'svc-nago');
+  expect(screen.queryByLabelText('Nome do novo serviço')).toBeNull();
+  expect((screen.getByLabelText('Duração · minutos') as HTMLInputElement).value).toBe('90');
+  expect((screen.getByLabelText('Valor total · R$') as HTMLInputElement).value).toBe('200.00');
+  expect(screen.getByText('trança boxeadora')).toBeDefined();
+  await user.type(hour, '20:00'); await user.click(screen.getByRole('button', { name: 'Confirmar atendimento na agenda' }));
+  await screen.findByText('Atendimento adicionado à agenda');
+  const [result, command] = saved.mock.calls[1] as [AppData, Extract<Command, { type: 'confirmTextDraft' }>];
+  expect(command.review.serviceName).toBe('Nagô');
+  expect(result.appointments.at(-1)).toMatchObject({ serviceId: 'svc-nago', serviceName: 'Nagô', durationMinutes: 90, priceCents: 20000, costCents: 3500 });
+  expect(result.services).toEqual(saved.mock.calls[0][0].services);
+  expect(result.drafts.at(-1)).toMatchObject({ message: MESSAGE_EXAMPLE, extraction: { serviceName: 'trança boxeadora' }, reviewed: { serviceName: 'Nagô' } });
+  expect(result.cashMovements).toEqual(saved.mock.calls[0][0].cashMovements);
+ });
+ it('permite completar um serviço não identificado escolhendo o cadastro e voltar ao nome da mensagem', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ extraction: { ...fields, serviceName: null, time: '20:00' } }))));
+  const user = userEvent.setup(); const saved = vi.fn(); render(<Harness saved={saved}/>);
+  await user.click(screen.getByRole('button', { name: 'Usar exemplo' })); await user.click(screen.getByRole('button', { name: 'Organizar mensagem' }));
+  const service = await screen.findByLabelText('Serviço do atendimento');
+  const confirm = screen.getByRole('button', { name: 'Confirmar atendimento na agenda' }) as HTMLButtonElement;
+  expect(confirm.disabled).toBe(true);
+  await user.selectOptions(service, 'svc-box'); expect(confirm.disabled).toBe(false);
+  await user.selectOptions(service, '__new__');
+  expect((screen.getByLabelText('Nome do novo serviço') as HTMLInputElement).value).toBe(''); expect(confirm.disabled).toBe(true);
+  await user.selectOptions(service, 'svc-box'); await user.click(confirm);
+  await screen.findByText('Atendimento adicionado à agenda');
+  expect(saved.mock.calls[1][0].appointments.at(-1)).toMatchObject({ serviceId: 'svc-box', serviceName: 'Box Braids', durationMinutes: 180, priceCents: 20000 });
  });
  it('reenvia o mesmo rascunho após falha de gravação sem cobrar outra análise', async () => {
   const fetcher = vi.fn().mockResolvedValue(new Response(JSON.stringify({ extraction: fields }))); vi.stubGlobal('fetch', fetcher);

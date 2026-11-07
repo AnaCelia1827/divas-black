@@ -25,5 +25,5 @@ export function paymentWarning(total: number | null, deposit: number | null, fin
 
 export function textDraftNotes(message: string, fields: TextExtraction) {
  const money = (value: number | null) => value === null ? 'não informado' : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value / 100);
- return `Local: ${fields.location || 'não informado'}. Serviço mencionado: ${fields.serviceName || 'não informado'}.\nEntrada combinada: ${money(fields.depositCents)}. Valor final combinado: ${money(fields.finalCents)}. Pagamentos ainda não registrados.\nMensagem original (íntegra no rascunho): ${message}`.slice(0, 2000);
+ return `Local: ${fields.location || 'não informado'}. Serviço do atendimento: ${fields.serviceName || 'não informado'}.\nEntrada combinada: ${money(fields.depositCents)}. Valor final combinado: ${money(fields.finalCents)}. Pagamentos ainda não registrados.\nMensagem original (íntegra no rascunho): ${message}`.slice(0, 2000);
 }
