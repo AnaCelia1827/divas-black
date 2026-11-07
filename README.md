@@ -8,6 +8,8 @@ A lista de compra soma a demanda da agenda ao complemento manual de cada materia
 
 “Baixar PDF” exporta a lista do período diretamente no navegador, sem enviar os dados para geração externa. O aplicativo também oferece modo escuro com preferência salva e padrão inicial do sistema; no desktop, o menu lateral pode ser recolhido e mantém a escolha. No celular, os cartões de atendimento aparecem em uma coluna.
 
+No Caixa, “Exportar planilha” baixa uma planilha financeira completa com Resumo, Movimentações, Atendimentos, A receber, Serviços, Categorias e Fluxo mensal. Caixa, categorias e meses respeitam os filtros de data, tipo e categoria; agenda e valores a receber usam todos os atendimentos das datas escolhidas. Saldos de atendimento consideram pagamentos/reembolsos acumulados de todas as datas. Custos ausentes ficam em branco, e estimativas ativas não incluem cancelamentos/ausências. O arquivo é gerado localmente, sem alterar registros ou enviar dados para conversão.
+
 ## Executar
 
 Requer Node.js 24.15 ou superior na linha 24 LTS. O projeto está configurado para Node.js 24 na Vercel.
@@ -25,10 +27,17 @@ O modo padrão salva no navegador e funciona sem conta, credenciais ou configura
 
 1. Crie um projeto Supabase e execute `supabase/migrations/001_demo_state.sql` no SQL Editor.
 2. Copie `.env.example` para `.env.local` e preencha `SUPABASE_URL` e `SUPABASE_SECRET_KEY` com a chave secret do projeto ou a chave service_role legada.
-3. Defina `DATA_PROVIDER=supabase` e reinicie o servidor. Na primeira leitura, dados fictícios são inseridos somente se ainda não houver snapshot.
+3. Execute `npm run build` e depois `npm run preview:supabase` em outro terminal. Essa instância força Supabase na porta 3001; `npm run dev` mantém a demonstração na porta 3000. Na primeira leitura do banco, dados fictícios são inseridos somente se ainda não houver snapshot.
 4. Verifique criar um cliente, recarregar e consultar pelo segundo navegador. Registre compra/pagamento e confira os indicadores.
 
 Nunca exponha a chave como `NEXT_PUBLIC_*`. Não envie `.env.local` ao Git. Se o banco configurado falhar, a aplicação mostra erro; não troca silenciosamente por armazenamento local.
+
+### Duas instâncias locais
+
+- Demonstração: `npm run dev:demo` → `http://localhost:3000`, com dados neste navegador.
+- Supabase: após o build, `npm run preview:supabase` → `http://localhost:3001`, com acesso ao banco pelo servidor.
+
+As duas instâncias usam o mesmo código. A segunda reinicia quando `.env.local` ou `.env` muda; atualize a página para tentar a nova configuração. Mudanças no código exigem novo build e reinício da prévia. Em produção, `npm start` respeita `DATA_PROVIDER` do ambiente. No celular na mesma rede, use o IP do computador no lugar de `localhost`; esse acesso depende do computador ligado e das permissões de rede do Windows.
 
 ## Deploy na Vercel
 
@@ -47,12 +56,13 @@ npm test
 npm run build
 ```
 
-A suíte automatizada cobre separação de previsto/recebido, pagamentos parciais, reembolso, conflitos de agenda, custos estimados sem impacto no caixa, snapshots históricos, demanda manual e itens fixos da lista de compra, geração de PDF, atualização atômica de compra/caixa, persistência, validação e concorrência. Também verifica rotas da API, carregamento e erros do hook, navegação e formulários em DOM simulado, incluindo cadastro de cliente durante o agendamento. Testes de banco usam armazenamento simulado com compare-and-swap; nenhuma conexão real é presumida. O PDF foi renderizado com PyMuPDF e inspecionado separadamente. Testes de DOM/HTTP não substituem validação visual por screenshots da interface final no navegador, que não foi realizada.
+A suíte automatizada cobre separação de previsto/recebido, pagamentos parciais, reembolso, conflitos de agenda, custos estimados sem impacto no caixa, snapshots históricos, demanda manual e itens fixos da lista de compra, geração de PDF, exportação financeira XLSX com fórmulas/resultados salvos e roundtrip, atualização atômica de compra/caixa, persistência, validação e concorrência. Também verifica rotas da API, carregamento e erros do hook, navegação e formulários em DOM simulado, incluindo cadastro de cliente durante o agendamento. Testes de banco usam armazenamento simulado com compare-and-swap; nenhuma conexão real é presumida. O PDF foi renderizado com PyMuPDF e inspecionado separadamente. Testes de DOM/HTTP não substituem validação visual por screenshots da interface final no navegador, que não foi realizada.
 
 ## Documentação
 
 - [Requisitos funcionais e regras de negócio](docs/requisitos.md)
 - [Contrato para API, agente e persistência](docs/integracao.md)
+- [Viabilidade e custos para uma usuária no celular](docs/plano-negocios.md)
 
 Compras são pagas no momento do registro. Consumo de material é explícito; concluir atendimento não baixa estoque nem recebe pagamento automaticamente. A receber e caixa realizado ficam separados.
 
