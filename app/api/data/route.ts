@@ -10,10 +10,11 @@ function provider() {
  return value;
 }
 export async function GET() {
+ let mode: 'demo' | 'supabase' | undefined;
  try {
-  const mode = provider();
+  mode = provider();
   return NextResponse.json({ mode, data: mode === 'supabase' ? await loadServerData() : null }, { headers: { 'Cache-Control': 'no-store' } });
- } catch { return NextResponse.json({ error: 'Não foi possível conectar ao banco. Confira a configuração do Supabase e tente novamente.' }, { status: 503 }); }
+ } catch { return NextResponse.json({ mode, error: 'Não foi possível conectar ao banco. Confira a configuração do Supabase e tente novamente.' }, { status: 503 }); }
 }
 export async function POST(request: NextRequest) {
  try {

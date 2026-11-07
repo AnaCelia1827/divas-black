@@ -17,6 +17,7 @@ export function useApp() {
    if (!repository.current) {
     const response = await fetch('/api/data', { cache: 'no-store' });
     const result = await response.json();
+    if (result.mode === 'demo' || result.mode === 'supabase') setMode(result.mode);
     if (!response.ok) throw new Error(result.error || 'Não foi possível carregar os dados. Tente novamente.');
     const currentMode: 'demo' | 'supabase' = result.mode;
     setMode(currentMode);

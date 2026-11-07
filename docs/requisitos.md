@@ -21,6 +21,7 @@ Aplicativo operacional para Carina organizar clientes, atendimentos, caixa e mat
 | RF13 | Funcionar em celular e computador com navegação curta, números grandes e ações rápidas. |
 | RF14 | Baixar PDF da lista de compra do período no navegador, incluindo demanda automática, manual e materiais fixos, sem envio para geração externa. |
 | RF15 | Alternar tema claro/escuro e recolher o menu lateral no desktop, preservando preferências locais; usar tema do sistema quando não houver escolha salva. |
+| RF16 | Exportar Excel financeiro com sete abas, filtros visíveis, datas/valores tipados, fórmulas com resultados calculados e totais conciliáveis. |
 
 ## Regras de negócio
 
@@ -43,6 +44,7 @@ Aplicativo operacional para Carina organizar clientes, atendimentos, caixa e mat
 - **RN17 — Materiais fixos e dados antigos:** ao ler uma demonstração existente, acrescentar Pomada/Mousse somente quando ausentes e reutilizar cadastro de mesmo nome sem distinguir maiúsculas. Preservar IDs, saldos, mínimos e demanda manual; marcar os fixos ativos e visíveis na lista. Os saldos iniciais zero e mínimos de uma unidade são exemplos fictícios ajustáveis. Não redefinir os demais dados da usuária.
 - **RN18 — Exportação:** o PDF usa a mesma lista e período consultados, com estoque, demanda e quantidade faltante; materiais fixos continuam presentes com falta zero. Gerar e baixar o arquivo não altera estoque ou caixa e não transmite os dados para serviço de conversão.
 - **RN19 — Apresentação:** tema e menu recolhido são preferências locais do navegador, independentes dos dados operacionais. No celular, cartões de atendimento ficam em uma coluna. Saudação apenas no início; cabeçalho da agenda sem subtítulo redundante.
+- **RN20 — Excel financeiro:** Movimentações, Categorias e Fluxo mensal seguem todos os filtros de data/tipo/categoria; Resumo identifica esse recorte. Atendimentos, A receber e Serviços usam todos os atendimentos das datas selecionadas, em São Paulo, independentemente do tipo/categoria do caixa. Saldo atual usa recebimentos menos reembolsos de todas as datas e é zero para cancelados/ausências. Estimativas do Resumo e Serviços consideram apenas confirmados/concluídos; custo desconhecido não vira custo zero. O histórico mantém todos os estados, valores e IDs, com custos ausentes em branco. Fórmulas têm resultados salvos para leitura imediata e recalculam ao abrir em Excel. Exportar não altera dados nem usa conversão externa.
 
 ## Fora desta entrega
 
@@ -62,3 +64,4 @@ Login, perfis de equipe, integração real de WhatsApp, agente de IA real, proce
 10. Somar demanda extra manual e ver Pomada/Mousse mesmo com estoque suficiente; exportar o mesmo período em PDF sem alterar registros.
 11. Alternar o tema, recarregar e manter a escolha; sem escolha salva, usar a preferência do sistema.
 12. Recolher o menu desktop e manter a escolha após recarregar; no celular, usar navegação inferior e cartões de atendimento em uma coluna.
+13. Exportar Excel com filtros ativos e conferir totais do caixa, pagamentos parciais, reembolsos, meses sem movimento, custos não informados e exclusão de cancelados/ausências do saldo previsto. Abrir o XLSX preservando datas, valores numéricos, filtros e fórmulas.

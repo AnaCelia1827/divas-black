@@ -26,7 +26,7 @@ describe('API de dados', () => {
   vi.stubEnv('DATA_PROVIDER', 'supabase');
   vi.mocked(loadServerData).mockRejectedValue(new Error('secret-value database unavailable'));
   const response = await GET(); const body = await response.json();
-  expect(response.status).toBe(503); expect(body.mode).toBeUndefined();
+  expect(response.status).toBe(503); expect(body.mode).toBe('supabase');
   expect(JSON.stringify(body)).not.toContain('secret-value');
  });
  it('rejeita provedor inválido', async () => {

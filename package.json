@@ -7,7 +7,9 @@
     "node": "24.x"
   },
   "scripts": {
-    "dev": "next dev --hostname 0.0.0.0",
+    "dev": "node scripts/run-instance.mjs demo dev 3000",
+    "dev:demo": "node scripts/run-instance.mjs demo dev 3000",
+    "preview:supabase": "node scripts/run-instance.mjs supabase start 3001",
     "build": "next build",
     "start": "next start --hostname 0.0.0.0",
     "typecheck": "tsc --noEmit",
@@ -17,6 +19,7 @@
     "@fontsource/dm-sans": "^5.2.0",
     "@fontsource/space-grotesk": "^5.2.0",
     "@supabase/supabase-js": "^2.80.0",
+    "exceljs": "^4.4.0",
     "lucide-react": "^0.468.0",
     "next": "^16.0.0",
     "pdf-lib": "^1.17.1",
@@ -24,6 +27,7 @@
     "react-dom": "^19.2.0",
     "zod": "^4.0.0"
   },
+  "overrides": { "exceljs": { "uuid": "^11.1.1" } },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.0",
     "@testing-library/react": "^16.3.3",

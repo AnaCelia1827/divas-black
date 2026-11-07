@@ -39,9 +39,9 @@ describe('integração da interface com persistência', () => {
   expect(hook.result.current.data?.clients.some(client => client.id === 'hook-client')).toBe(false);
  });
  it('mostra falha do banco sem criar dados demo', async () => {
-  vi.mocked(fetch).mockImplementation(async () => new Response(JSON.stringify({ error: 'Banco indisponível. Tente novamente.' }), { status: 503 }));
+  vi.mocked(fetch).mockImplementation(async () => new Response(JSON.stringify({ mode: 'supabase', error: 'Banco indisponível. Tente novamente.' }), { status: 503 }));
   const hook = renderHook(() => useApp()); await waitFor(() => expect(hook.result.current.loading).toBe(false));
-  expect(hook.result.current.data).toBeNull(); expect(hook.result.current.error).toContain('Banco indisponível');
+  expect(hook.result.current.data).toBeNull(); expect(hook.result.current.error).toContain('Banco indisponível'); expect(hook.result.current.mode).toBe('supabase');
   expect(window.localStorage.length).toBe(0);
  });
  it('em Supabase envia o comando pelo servidor e atualiza o estado', async () => {

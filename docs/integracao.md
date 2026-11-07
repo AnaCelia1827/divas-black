@@ -52,6 +52,12 @@ Para a API externa, mapear a conversa para rascunho e permitir revisão. A mensa
 
 `lib/shopping-pdf.ts` gera o PDF no navegador a partir de `AppData`, início e fim do período, usando o mesmo `getShoppingList`. A geração não chama serviço externo, não cria comandos e não modifica estoque ou caixa. O arquivo usa tabela com estoque, demanda total e quantidade a comprar, incluindo fixos com falta zero.
 
+`lib/financial-xlsx.ts` exporta `buildFinancialWorkbook(data, filters, now?)`, `generateFinancialSpreadsheet(...)` e `downloadFinancialSpreadsheet(...)`. `FinancialExportFilters` contém `from`, `to`, `direction?: 'all' | 'in' | 'out'`, `category?: string` e `mode?: 'demo' | 'supabase'`; categoria vazia/omitida ou `all` significa todas. A implementação usa o workbook documental do ExcelJS, compatível com browser, carregado quando a usuária solicita a exportação. O download usa Blob local, sem endpoint, upload ou gravação do estado do salão.
+
+O XLSX contém Resumo, Movimentações, Atendimentos, A receber, Serviços, Categorias e Fluxo mensal. As três visões de caixa filtram data/tipo/categoria antes de calcular; agenda filtra apenas datas de atendimento em São Paulo. Recebimento acumulado inclui todas as datas e reembolsos; não representa posição histórica do último dia do filtro. Saldos cancelados/ausências ficam zerados e estimativas de serviços/resumo consideram somente ativos. Custo ausente fica em branco com indicação de ausência, distinguindo zero legítimo. Colunas de entradas/reembolsos acumulados explicam a composição do saldo, e IDs ficam no fim das abas de origem.
+
+Valores são centavos convertidos em números de moeda, datas são células de data e horas são frações de dia com formato de horário. Fórmulas em inglês têm resultados calculados em JavaScript a partir dos centavos e a opção de recálculo ao abrir. Textos iniciados por `=` continuam strings literais. Testes fazem roundtrip do arquivo XLSX, conferindo os resultados salvos; isso não substitui recálculo independente na aplicação nativa.
+
 Tema claro/escuro e menu lateral recolhido são preferências de apresentação salvas no navegador, fora do snapshot operacional e do contrato de comandos. Sem tema explícito salvo, a interface segue `prefers-color-scheme`. Esses estados não exigem novos endpoints nem mudanças no banco. A navegação inferior substitui o menu lateral no celular.
 
 ## Persistência escolhida para o hackathon
