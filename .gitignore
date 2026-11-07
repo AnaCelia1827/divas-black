@@ -1,0 +1,11 @@
+node_modules/
+.cache/
+.next/
+.env*
+!.env.example
+*.tsbuildinfo
+coverage/
+.vercel/
+.impeccable/review/
+.impeccable/questions/
+test-results/

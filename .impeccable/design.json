@@ -1,0 +1,193 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-07T17:11:36Z",
+  "title": "Design System: Divas Black",
+  "extensions": {
+    "colorMeta": {
+      "pink": {
+        "role": "primary",
+        "displayName": "Rosa forte da marca"
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Preto de navegação e conteúdo"
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Fundo claro de operação"
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Superfície branca"
+      },
+      "note-pink": {
+        "role": "secondary",
+        "displayName": "Post-it rosa"
+      },
+      "note-lavender": {
+        "role": "secondary",
+        "displayName": "Post-it lavanda"
+      },
+      "note-yellow": {
+        "role": "secondary",
+        "displayName": "Post-it amarelo"
+      },
+      "note-green": {
+        "role": "secondary",
+        "displayName": "Post-it verde"
+      },
+      "note-blue": {
+        "role": "secondary",
+        "displayName": "Post-it azul"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Título de página",
+        "purpose": "Hierarquia principal, com ajustes responsivos."
+      },
+      "metric": {
+        "displayName": "Valor em destaque",
+        "purpose": "Recebido, gasto e saldo com algarismos tabulares."
+      },
+      "body": {
+        "displayName": "Texto de operação",
+        "purpose": "Leitura ampla de conteúdo e formulários."
+      },
+      "field": {
+        "displayName": "Campo do painel",
+        "purpose": "18px no desktop; 16px até 560px."
+      }
+    },
+    "shadows": [
+      {
+        "name": "note-rest",
+        "value": "0 5px 10px -8px #61524255",
+        "purpose": "Elevação curta do papel."
+      },
+      {
+        "name": "note-hover",
+        "value": "0 10px 16px -11px #61524270",
+        "purpose": "Resposta ao hover com translateY(-3px)."
+      },
+      {
+        "name": "operation-panel",
+        "value": "-16px 0 60px #0002",
+        "purpose": "Separar o painel lateral da aplicação."
+      },
+      {
+        "name": "success-toast",
+        "value": "0 8px 25px -5px #1115",
+        "purpose": "Feedback temporário."
+      }
+    ],
+    "motion": [
+      {
+        "name": "controls",
+        "value": "background .18s, transform .18s",
+        "purpose": "Transição global de botões."
+      },
+      {
+        "name": "postit",
+        "value": "transform .2s, box-shadow .2s",
+        "purpose": "Resposta do papel ao hover."
+      },
+      {
+        "name": "form-buttons",
+        "value": "background .15s",
+        "purpose": "Transição do botão do painel."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation:none!important; transition:none!important; scroll-behavior:auto!important",
+        "purpose": "Aplicado em prefers-reduced-motion:reduce."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide",
+        "value": "1550px"
+      },
+      {
+        "name": "compact-desktop",
+        "value": "1250px"
+      },
+      {
+        "name": "tablet",
+        "value": "1000px"
+      },
+      {
+        "name": "mobile-navigation",
+        "value": "700px"
+      },
+      {
+        "name": "compact-panel",
+        "value": "560px"
+      },
+      {
+        "name": "narrow-mobile",
+        "value": "370px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Ação principal",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ação rosa com texto escuro e pelo menos 48px de altura.",
+      "html": "<button class=\"ds-primary\">Novo atendimento</button>",
+      "css": ".ds-primary{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:48px;padding:12px 18px;border:0;border-radius:9px;background:var(--pink);color:var(--ink);font:600 16px var(--body);cursor:pointer;transition:background .18s,transform .18s}.ds-primary:hover{filter:brightness(.97)}.ds-primary:focus-visible{outline:3px solid var(--pink);outline-offset:4px}.ds-primary:disabled{cursor:wait;opacity:.5}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none}}"
+    },
+    {
+      "name": "Campo de formulário",
+      "kind": "input",
+      "refersTo": "input-form",
+      "description": "Rótulo acima e foco rosado.",
+      "html": "<label class=\"ds-field\"><span>Nome da cliente</span><input placeholder=\"Como ela se chama?\" autocomplete=\"name\"></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:8px;font:600 16px var(--body);color:#111;min-width:0}.ds-field input{width:100%;min-height:52px;padding:12px 14px;border:1px solid #d4d2cd;background:#fff;border-radius:12px;color:#111;font:400 18px/1.4 var(--body);min-width:0;caret-color:#c90072}.ds-field input:focus{outline:3px solid #ff14933b;border-color:#c90072;outline-offset:2px}.ds-field input:disabled{background:#f4f3ef;color:#666}.ds-field input::placeholder{color:#71716b;font-size:16px}@media(max-width:560px){.ds-field{font-size:14px}.ds-field input{font-size:16px;padding:12px 10px}}"
+    },
+    {
+      "name": "Atendimento em post-it",
+      "kind": "custom",
+      "refersTo": "postit",
+      "description": "Papel quase quadrado por atendimento; no celular, amostra da visão diária.",
+      "html": "<button class=\"ds-postit\"><span class=\"ds-note-top\">09:00 <span>Confirmado</span></span><strong>Camila Santos</strong><span class=\"ds-service\">Box Braids</span><span class=\"ds-note-status\">Sinal recebido</span><span class=\"ds-note-bottom\"><span>180 min</span><b>R$ 320,00</b></span></button>",
+      "css": ".ds-postit{width:100%;min-height:190px;aspect-ratio:1/1.05;height:auto;padding:15px 13px;text-align:left;display:flex;flex-direction:column;position:relative;border:0;border-radius:3px 3px 16px 3px;background:#F4B6DA;color:#111;box-shadow:0 5px 10px -8px #61524255;transition:transform .2s,box-shadow .2s;overflow:visible;font-family:var(--body);cursor:pointer}.ds-postit:after{content:'';position:absolute;right:0;bottom:0;width:16px;height:16px;background:#0000000c;border-top-left-radius:5px}.ds-postit:hover{transform:translateY(-3px);box-shadow:0 10px 16px -11px #61524270}.ds-postit:focus-visible{outline:3px solid var(--pink);outline-offset:4px}.ds-note-top{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600;margin-bottom:12px}.ds-postit>strong{font-family:var(--display);font-size:18px;line-height:1.15;font-weight:600;letter-spacing:-.03em;overflow-wrap:anywhere}.ds-service{font-size:14px;margin-top:5px;line-height:1.3}.ds-note-status{font-size:12px;line-height:1.4;margin-top:9px;opacity:.8}.ds-note-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:13px;gap:4px;font-size:11px}.ds-note-bottom b{white-space:nowrap;font-weight:600}@media(max-width:700px){.ds-postit{aspect-ratio:1/1.13;min-height:0;padding:13px 11px}.ds-note-top{margin-bottom:10px}.ds-postit>strong{line-height:1.12}.ds-note-status{margin-top:8px}.ds-note-bottom{padding-top:12px;gap:5px}}@media(prefers-reduced-motion:reduce){.ds-postit{transition:none}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "O salão em post-its",
+    "overview": "Interface de operação para consultar e registrar informações entre atendimentos. Preto e rosa forte identificam a marca; superfícies claras organizam números, formulários e listas. O atendimento aparece como papel quase quadrado colorido pelo serviço, com rótulos explícitos.",
+    "keyCharacteristics": [
+      "Preto e rosa forte",
+      "Post-its quase quadrados",
+      "Tipografia ampla e números tabulares",
+      "Menu lateral no desktop e navegação inferior no celular"
+    ],
+    "rules": [
+      {
+        "name": "The Color-and-Text Rule",
+        "body": "Serviço, estado e pagamento continuam compreensíveis sem depender da cor.",
+        "section": "colors"
+      },
+      {
+        "name": "The Numbers Rule",
+        "body": "Valores em destaque usam números tabulares, separados dos rótulos e períodos.",
+        "section": "typography"
+      }
+    ],
+    "dos": [
+      "Preservar preto, rosa forte e superfícies claras.",
+      "Manter foco visível, ações amplas e espaço para navegação móvel.",
+      "Manter post-its quase quadrados e conteúdo curto.",
+      "Separar visualmente recebido, gasto, saldo e previsão."
+    ],
+    "donts": [
+      "Não depender apenas da cor ou de hover.",
+      "Não substituir fontes self-hosted nem reduzir campos para aumentar densidade.",
+      "Não retornar a post-its estreitos e altos.",
+      "Não afirmar validação visual por screenshots; documentação extraída do CSS, com testes DOM/HTTP."
+    ]
+  }
+}
