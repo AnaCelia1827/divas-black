@@ -42,11 +42,15 @@ Exemplo de recebimento, valores em centavos:
 
 Use o mesmo `commandId` ao repetir uma requisição cujo resultado se perdeu. O ID é armazenado na mesma transação do efeito. IDs de lançamentos não podem ser reutilizados com outro comando. Para novos eventos, gere IDs novos.
 
-## Integração futura da assistente
+## Assistente na interface e backend de WhatsApp
 
-A versão entregue apresenta um `AssistantDraft` fictício e revisável. Não existe chamada real para IA/WhatsApp nem endpoint de webhook. O draft contém cliente, telefone, serviço, instante com timezone, preço, observação e mensagem de origem; confirmação registra `confirmedAppointmentId`.
+A interface apresenta um `AssistantDraft` fictício e revisável. O draft contém cliente, telefone, serviço, instante com timezone, preço, observação e mensagem de origem; confirmação registra `confirmedAppointmentId`.
 
-Para a API externa, mapear a conversa para rascunho e permitir revisão. A mensagem de uma cliente dizendo que pagará não autoriza `recordCash`. Não confirmar datas ambíguas automaticamente. Acrescentar ingestão de rascunhos validada na API externa antes de conectar o agente real; o MVP não oferece uma gravação pública irrestrita de `AppData`.
+O backend real de WhatsApp está no pacote independente [`integrations/whatsapp`](../integrations/whatsapp/README.md). Ele implementa `GET/POST /webhooks/whatsapp` no servidor local da porta 3001 e entrega o contrato [`IntegrationEvent` versão 1](../integrations/whatsapp/docs/CONTRATO.md) a um receptor configurado por `SOFTWARE_WEBHOOK_URL`. O receptor de teste persiste e deduplica os eventos na porta 3002. Dados, dependências e variáveis desse pacote ficam separados da aplicação Next.js; comandos `whatsapp:*` na raiz permitem operá-lo.
+
+O formato de evento de WhatsApp não é um `Command` do aplicativo. A integração do repositório mantém os dois serviços lado a lado; não cria uma gravação pública de `AppData` nem confirmação automática de agenda. Para conectar a interface no futuro, adicionar ingestão validada de rascunhos ao repositório escolhido, incluindo revisão de ano/endereço ausentes e associação explícita de cliente e serviço. O modo demo da interface usa `localStorage`, que o servidor de WhatsApp não pode alterar diretamente.
+
+Para a API externa, mapear a conversa para rascunho e permitir revisão. A mensagem de uma cliente dizendo que pagará não autoriza `recordCash`. Não confirmar datas ambíguas automaticamente. O emissor entrega atendimento nulo e mensagens originais quando a IA falha, com estado explícito; não simula resultado real silenciosamente.
 
 ## Persistência escolhida para o hackathon
 

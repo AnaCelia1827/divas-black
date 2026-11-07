@@ -1,0 +1,22 @@
+{
+  "object": "whatsapp_business_account",
+  "entry": [{
+    "id": "demo-waba",
+    "changes": [{
+      "field": "messages",
+      "value": {
+        "messaging_product": "whatsapp",
+        "metadata": { "display_phone_number": "5500000000000", "phone_number_id": "100000000000000" },
+        "contacts": [{ "wa_id": "5500000000000", "profile": { "name": "Remetente de demonstração" } }],
+        "messages": [{
+          "from": "5500000000000",
+          "id": "wamid.demo-maria",
+          "timestamp": "1794052800",
+          "type": "text",
+          "context": { "forwarded": true },
+          "text": { "body": "Olá Maria, iremos fazer o seu atendimento às 16 do dia 07/11 no salão mesmo para fazer as suas tranças boxeadoras." }
+        }]
+      }
+    }]
+  }]
+}

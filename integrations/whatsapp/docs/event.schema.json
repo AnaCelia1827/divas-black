@@ -1,0 +1,340 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "number",
+      "const": 1
+    },
+    "event_id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    },
+    "conversation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revision": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "phone_number_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contact": {
+      "type": "object",
+      "properties": {
+        "wa_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "profile_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "wa_id",
+        "profile_name"
+      ],
+      "additionalProperties": false
+    },
+    "messages": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "phone_number_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "conversation_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sender": {
+            "type": "object",
+            "properties": {
+              "wa_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "profile_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "wa_id",
+              "profile_name"
+            ],
+            "additionalProperties": false
+          },
+          "direction": {
+            "type": "string",
+            "const": "inbound"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "text": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reply_to_message_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "forwarded": {
+            "type": "boolean"
+          },
+          "metadata": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          }
+        },
+        "required": [
+          "id",
+          "phone_number_id",
+          "conversation_id",
+          "sender",
+          "direction",
+          "timestamp",
+          "received_at",
+          "type",
+          "text",
+          "reply_to_message_id",
+          "forwarded",
+          "metadata"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "atendimento": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "cliente": {
+              "type": "object",
+              "properties": {
+                "nome": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "telefone": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "nome",
+                "telefone"
+              ],
+              "additionalProperties": false
+            },
+            "data_informada": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "data_atendimento": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "hora_atendimento": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "fuso_horario": {
+              "type": "string",
+              "const": "America/Sao_Paulo"
+            },
+            "localizacao": {
+              "type": "object",
+              "properties": {
+                "tipo": {
+                  "type": "string",
+                  "enum": [
+                    "salao",
+                    "domicilio",
+                    "outro",
+                    "nao_informado"
+                  ]
+                },
+                "descricao": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "endereco": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "tipo",
+                "descricao",
+                "endereco"
+              ],
+              "additionalProperties": false
+            },
+            "servico": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "requer_revisao": {
+              "type": "boolean",
+              "const": true
+            },
+            "pendencias": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "cliente",
+            "data_informada",
+            "data_atendimento",
+            "hora_atendimento",
+            "fuso_horario",
+            "localizacao",
+            "servico",
+            "requer_revisao",
+            "pendencias"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "evidencias": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "campo": {
+            "type": "string",
+            "enum": [
+              "cliente.nome",
+              "cliente.telefone",
+              "data_informada",
+              "data_atendimento",
+              "hora_atendimento",
+              "localizacao",
+              "servico"
+            ]
+          },
+          "message_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "campo",
+          "message_ids"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "extraction_status": {
+      "type": "string",
+      "enum": [
+        "completed",
+        "failed"
+      ]
+    },
+    "extraction_error": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "context_truncated": {
+      "type": "boolean"
+    },
+    "context_message_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "requires_review": {
+      "type": "boolean",
+      "const": true
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+    }
+  },
+  "required": [
+    "schema_version",
+    "event_id",
+    "conversation_id",
+    "revision",
+    "phone_number_id",
+    "contact",
+    "messages",
+    "atendimento",
+    "evidencias",
+    "extraction_status",
+    "extraction_error",
+    "context_truncated",
+    "context_message_ids",
+    "requires_review",
+    "generated_at"
+  ],
+  "additionalProperties": false
+}

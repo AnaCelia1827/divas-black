@@ -11,7 +11,16 @@
     "build": "next build",
     "start": "next start --hostname 0.0.0.0",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "whatsapp:install": "npm --prefix integrations/whatsapp ci",
+    "whatsapp:setup": "npm --prefix integrations/whatsapp run setup:demo",
+    "whatsapp:start": "npm --prefix integrations/whatsapp start",
+    "whatsapp:receiver": "npm --prefix integrations/whatsapp run receiver",
+    "whatsapp:demo": "npm --prefix integrations/whatsapp run demo",
+    "whatsapp:replay": "npm --prefix integrations/whatsapp run replay --",
+    "whatsapp:typecheck": "npm --prefix integrations/whatsapp run typecheck",
+    "whatsapp:test": "npm --prefix integrations/whatsapp test",
+    "whatsapp:build": "npm --prefix integrations/whatsapp run build"
   },
   "dependencies": {
     "@fontsource/dm-sans": "^5.2.0",

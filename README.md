@@ -1,6 +1,6 @@
 # Divas Black
 
-Software de gestão do salão: agenda em post-its, clientes, serviços, caixa e materiais. Interface em português, responsiva, com preto e rosa forte. A primeira versão funciona sem login e usa dados fictícios; WhatsApp e assistente são simulações revisáveis.
+Software de gestão do salão: agenda em post-its, clientes, serviços, caixa e materiais. Interface em português, responsiva, com preto e rosa forte. A primeira versão funciona sem login e usa dados fictícios. A assistente na interface usa rascunhos demonstrativos revisáveis; o backend real de WhatsApp está em `integrations/whatsapp`.
 
 Custos entram de duas formas: “Adicionar custo” registra uma despesa paga do salão; o cadastro de serviço e o atendimento permitem custo estimado. A estimativa fica preservada no histórico e não cria despesa automática no caixa.
 
@@ -27,6 +27,34 @@ O modo padrão salva no navegador e funciona sem conta, credenciais ou configura
 4. Verifique criar um cliente, recarregar e consultar pelo segundo navegador. Registre compra/pagamento e confira os indicadores.
 
 Nunca exponha a chave como `NEXT_PUBLIC_*`. Não envie `.env.local` ao Git. Se o banco configurado falhar, a aplicação mostra erro; não troca silenciosamente por armazenamento local.
+
+## API de WhatsApp
+
+O aplicativo Next.js fica na raiz (porta 3000). O módulo independente em [`integrations/whatsapp`](integrations/whatsapp/README.md) recebe webhooks da Meta (porta 3001), persiste mensagens em SQLite, extrai cliente/data/horário/local/serviço por IA e envia JSON para um receptor configurável. O receptor de teste usa a porta 3002.
+
+```bash
+npm run whatsapp:install
+npm run whatsapp:setup
+# Execute cada um dos próximos comandos em um terminal separado:
+npm run whatsapp:receiver
+npm run whatsapp:start
+# Depois envie o exemplo fictício:
+npm run whatsapp:demo
+```
+
+Configure as credenciais reais somente em `integrations/whatsapp/.env`, conforme o [guia do módulo](integrations/whatsapp/README.md). A configuração do aplicativo continua em `.env.local`, na raiz. O banco SQLite da integração é local e não deve ser usado como armazenamento persistente em um deploy Vercel.
+
+O [contrato de eventos](integrations/whatsapp/docs/CONTRATO.md) entrega sugestões revisáveis; o [JSON Schema](integrations/whatsapp/docs/event.schema.json) valida o pacote. `SOFTWARE_WEBHOOK_URL` aponta inicialmente para o receptor de teste. A interface Next.js ainda não ingere esses eventos: não aponte o emissor diretamente para `/api/data`, que aceita comandos do domínio, não pacotes de conversa. Essa separação preserva as regras de confirmação manual, caixa e estoque do aplicativo.
+
+Para verificar o módulo a partir da raiz:
+
+```bash
+npm run whatsapp:typecheck
+npm run whatsapp:test
+npm run whatsapp:build
+```
+
+A [cotação de planejamento](integrations/whatsapp/docs/CUSTOS.md) separa consumo de IA, infraestrutura e hipótese de desenvolvimento.
 
 ## Deploy na Vercel
 
