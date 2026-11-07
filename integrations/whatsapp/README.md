@@ -2,14 +2,14 @@
 
 API local, sem interface: **WhatsApp → webhook assinado → SQLite → extração por IA → JSON enviado ao software**.
 
-Este pacote está integrado ao repositório do aplicativo Next.js em `integrations/whatsapp`. Os comandos abaixo devem ser executados **neste diretório**. A partir da raiz, use os atalhos `npm.cmd run whatsapp:start`, `whatsapp:receiver`, `whatsapp:demo`, `whatsapp:test`, `whatsapp:typecheck` e `whatsapp:build`. O aplicativo mantém seus comandos `dev`, `start`, `build` e `test` na raiz.
+Este pacote está integrado ao repositório do aplicativo Next.js em `integrations/whatsapp`. Os comandos abaixo devem ser executados **neste diretório**. A partir da raiz, use os atalhos `npm.cmd run whatsapp:start`, `whatsapp:receiver`, `whatsapp:demo`, `whatsapp:test`, `whatsapp:test:live`, `whatsapp:typecheck` e `whatsapp:build`. O aplicativo mantém seus comandos `dev`, `start`, `build` e `test` na raiz.
 
 Extrai nome da cliente, data, horário, localização e serviço. Cada resultado requer revisão humana. Não confirma atendimentos, pagamentos ou movimentações de estoque.
 
 ## Requisitos
 
-- Node.js **24.15 ou superior da linha 24**, npm e acesso à internet para instalar dependências/consultar a OpenAI.
-- Chave válida da OpenAI com acesso a `gpt-5.4-mini`.
+- Node.js **24.15 ou superior da linha 24**, npm e acesso à internet para instalar dependências/consultar a Groq.
+- Chave válida da **Groq**, com acesso a `openai/gpt-oss-20b` (modelo padrão com suporte a JSON Schema estrito).
 - Para mensagens reais: aplicativo Meta com WhatsApp, WABA, número de teste e ngrok configurados na sua conta.
 
 No Windows, use `npm.cmd`: evita a restrição do PowerShell sobre `npm.ps1`.
@@ -21,9 +21,18 @@ npm.cmd ci
 npm.cmd run setup:demo
 ```
 
-O segundo comando cria `.env` **apenas se o arquivo não existir**, com segredos aleatórios para a demonstração local. Esse App Secret é fictício e não conecta uma conta Meta. Sua chave real da OpenAI não é gravada nem exibida pelo script.
+O segundo comando cria `.env` **apenas se o arquivo não existir**, com segredos aleatórios para a demonstração local. Esse App Secret é fictício e não conecta uma conta Meta. Sua chave real da Groq não é gravada nem exibida pelo script.
 
-Configure `OPENAI_API_KEY` no ambiente ou em `.env`. Variáveis já existentes no ambiente prevalecem sobre `.env`. Não compartilhe esse arquivo nem faça commit dele. `SALON_ADDRESS` pode conter o endereço real do salão; vazio deixa uma pendência de revisão.
+Crie uma chave em [Groq API Keys](https://console.groq.com/keys) e configure no ambiente ou em `.env`:
+
+```dotenv
+GROQ_API_KEY=SUA_CHAVE_GROQ
+GROQ_MODEL=openai/gpt-oss-20b
+```
+
+O prefixo `openai/` identifica a família do modelo aberto; a requisição é enviada à **Groq**, em `https://api.groq.com/openai/v1/chat/completions`. Chaves `OPENAI_API_KEY` e `XAI_API_KEY` não são usadas. Groq é um serviço diferente do Grok/xAI.
+
+Variáveis já existentes no ambiente prevalecem sobre `.env`. Se houver uma `GROQ_API_KEY` antiga no terminal, remova somente essa variável da sessão (`Remove-Item Env:GROQ_API_KEY -ErrorAction SilentlyContinue` no PowerShell) antes de iniciar a aplicação com a chave do arquivo. Não compartilhe esse arquivo nem faça commit dele. `SALON_ADDRESS` pode conter o endereço real do salão; vazio deixa uma pendência de revisão.
 
 Em dois terminais separados:
 
@@ -51,7 +60,9 @@ Você também pode verificar apenas a chamada real de IA:
 npm.cmd run test:live
 ```
 
-Esse teste envia somente a mensagem fictícia e verifica Maria, 16:00, ano não informado, telefone não atribuído ao remetente e serviço "Tranças boxeadoras". **Consome a API real.** `npm.cmd test` usa respostas controladas e não consome IA.
+Esse teste envia somente a mensagem fictícia à Groq e verifica Maria, 16:00, ano não informado, telefone não atribuído ao remetente e serviço "Tranças boxeadoras". **Consome a API real e seus limites de uso.** `npm.cmd test` usa respostas controladas e não consome IA. O comando equivalente na raiz é `npm.cmd run whatsapp:test:live`. Reinicie a API após alterar `.env`.
+
+O extrator usa `response_format.json_schema` com `strict: true`, temperatura zero e raciocínio `low`. O modelo padrão e `openai/gpt-oss-120b` suportam esse formato; antes de substituir `GROQ_MODEL`, confira a [lista oficial de modelos com saída estruturada](https://console.groq.com/docs/structured-outputs). JSON válido não garante interpretação correta: a revisão humana continua obrigatória.
 
 ## Conectar o número de teste da Meta
 

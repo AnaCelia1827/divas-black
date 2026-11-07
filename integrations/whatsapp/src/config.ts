@@ -5,12 +5,21 @@ export interface Config {
   appSecret: string;
   verifyToken: string;
   phoneNumberId: string | undefined;
-  openaiKey: string;
-  openaiModel: string;
+  groqKey: string;
+  groqModel: string;
   salonAddress: string | undefined;
   softwareUrl: string;
   softwareToken: string;
   debounceMs: number;
+}
+
+export const DEFAULT_GROQ_MODEL = 'openai/gpt-oss-20b';
+
+export function loadGroqConfig(env: NodeJS.ProcessEnv = process.env) {
+  return {
+    groqKey: env.GROQ_API_KEY?.trim() || '',
+    groqModel: env.GROQ_MODEL?.trim() || DEFAULT_GROQ_MODEL,
+  };
 }
 
 function required(env: NodeJS.ProcessEnv, name: string): string {
@@ -38,7 +47,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     appSecret: required(env, 'META_APP_SECRET'),
     verifyToken: required(env, 'WHATSAPP_VERIFY_TOKEN'),
     phoneNumberId: env.WHATSAPP_PHONE_NUMBER_ID || undefined,
-    openaiKey: env.OPENAI_API_KEY || '', openaiModel: env.OPENAI_MODEL || 'gpt-5.4-mini',
+    ...loadGroqConfig(env),
     salonAddress: env.SALON_ADDRESS?.trim() || undefined,
     softwareUrl, softwareToken: required(env, 'SOFTWARE_API_TOKEN'), debounceMs: 5000,
   };

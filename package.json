@@ -20,6 +20,7 @@
     "whatsapp:replay": "npm --prefix integrations/whatsapp run replay --",
     "whatsapp:typecheck": "npm --prefix integrations/whatsapp run typecheck",
     "whatsapp:test": "npm --prefix integrations/whatsapp test",
+    "whatsapp:test:live": "npm --prefix integrations/whatsapp run test:live",
     "whatsapp:build": "npm --prefix integrations/whatsapp run build"
   },
   "dependencies": {

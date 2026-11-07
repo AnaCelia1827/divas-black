@@ -1,16 +1,16 @@
 import { loadConfig } from './config.ts';
 import { Store } from './store.ts';
 import { createWebhookApp } from './webhook.ts';
-import { createOpenAIExtractor } from './extraction.ts';
+import { createGroqExtractor } from './extraction.ts';
 import { Worker } from './worker.ts';
 
 try {
   const config = loadConfig();
   const store = new Store(config.databasePath);
-  const worker = new Worker(store, createOpenAIExtractor(config), config);
+  const worker = new Worker(store, createGroqExtractor(config), config);
   const server = createWebhookApp(store, config).listen(config.port, config.host, () => {
     console.log(`API local: http://${config.host}:${config.port}; webhook: /webhooks/whatsapp`);
-    if (!config.openaiKey) console.warn('OPENAI_API_KEY ausente: mensagens serão entregues com extraction_status=failed.');
+    if (!config.groqKey) console.warn('GROQ_API_KEY ausente: mensagens serão entregues com extraction_status=failed.');
     worker.start();
   });
   server.on('error', error => { console.error(`Não foi possível iniciar a API: ${error.message}`); store.close(); process.exitCode = 1; });

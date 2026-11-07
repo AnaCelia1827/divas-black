@@ -8,9 +8,9 @@ DATABASE_PATH=./data/whatsapp.sqlite
 META_APP_SECRET=${randomBytes(24).toString('hex')}
 WHATSAPP_VERIFY_TOKEN=${randomBytes(24).toString('hex')}
 WHATSAPP_PHONE_NUMBER_ID=
-# Se OPENAI_API_KEY já estiver no ambiente, não é necessário gravá-la neste arquivo.
-# OPENAI_API_KEY=
-OPENAI_MODEL=gpt-5.4-mini
+# Configure sua chave Groq aqui ou no ambiente. Não use uma chave da OpenAI/xAI.
+GROQ_API_KEY=
+GROQ_MODEL=openai/gpt-oss-20b
 SALON_ADDRESS=
 SOFTWARE_WEBHOOK_URL=http://127.0.0.1:3002/integrations/whatsapp/events
 SOFTWARE_API_TOKEN=${randomBytes(24).toString('hex')}

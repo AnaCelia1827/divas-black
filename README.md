@@ -30,7 +30,7 @@ Nunca exponha a chave como `NEXT_PUBLIC_*`. Não envie `.env.local` ao Git. Se o
 
 ## API de WhatsApp
 
-O aplicativo Next.js fica na raiz (porta 3000). O módulo independente em [`integrations/whatsapp`](integrations/whatsapp/README.md) recebe webhooks da Meta (porta 3001), persiste mensagens em SQLite, extrai cliente/data/horário/local/serviço por IA e envia JSON para um receptor configurável. O receptor de teste usa a porta 3002.
+O aplicativo Next.js fica na raiz (porta 3000). O módulo independente em [`integrations/whatsapp`](integrations/whatsapp/README.md) recebe webhooks da Meta (porta 3001), persiste mensagens em SQLite, extrai cliente/data/horário/local/serviço pela API da **Groq** e envia JSON para um receptor configurável. O receptor de teste usa a porta 3002.
 
 ```bash
 npm run whatsapp:install
@@ -42,7 +42,7 @@ npm run whatsapp:start
 npm run whatsapp:demo
 ```
 
-Configure as credenciais reais somente em `integrations/whatsapp/.env`, conforme o [guia do módulo](integrations/whatsapp/README.md). A configuração do aplicativo continua em `.env.local`, na raiz. O banco SQLite da integração é local e não deve ser usado como armazenamento persistente em um deploy Vercel.
+Configure as credenciais reais somente em `integrations/whatsapp/.env`, conforme o [guia do módulo](integrations/whatsapp/README.md). A extração usa `GROQ_API_KEY` e `GROQ_MODEL=openai/gpt-oss-20b`; teste a chave com `npm run whatsapp:test:live`. A configuração do aplicativo continua em `.env.local`, na raiz. O banco SQLite da integração é local e não deve ser usado como armazenamento persistente em um deploy Vercel.
 
 O [contrato de eventos](integrations/whatsapp/docs/CONTRATO.md) entrega sugestões revisáveis; o [JSON Schema](integrations/whatsapp/docs/event.schema.json) valida o pacote. `SOFTWARE_WEBHOOK_URL` aponta inicialmente para o receptor de teste. A interface Next.js ainda não ingere esses eventos: não aponte o emissor diretamente para `/api/data`, que aceita comandos do domínio, não pacotes de conversa. Essa separação preserva as regras de confirmação manual, caixa e estoque do aplicativo.
 

@@ -105,32 +105,42 @@ Para domicilio/outro, endereço somente quando explícito. Local ausente é nao_
 requer_revisao é SEMPRE true. Não confirme agendamento ou recebimento de dinheiro.
 Se o contexto estiver truncado ou remarcação/cancelamento estiverem ambíguos, informe em pendencias.
 Use evidencias para cliente.nome, cliente.telefone, data_informada, data_atendimento,
-hora_atendimento, localizacao e servico quando preenchidos. Pode usar os mesmos IDs para vários campos.`;
+hora_atendimento, localizacao e servico quando preenchidos. Pode usar os mesmos IDs para vários campos.
+Antes de responder, confira se CADA campo preenchido tem sua evidência. Quando "no salão" for
+o local afirmado do último acordo, preencha localizacao.tipo=salao e inclua campo:"localizacao"
+com o ID da mensagem. Respeite negações, cancelamentos e correções posteriores; não use um local descartado.`;
 
-export function createOpenAIExtractor(config: Pick<Config, 'openaiKey' | 'openaiModel' | 'salonAddress'>, fetcher: typeof fetch = fetch) {
+export function createGroqExtractor(config: Pick<Config, 'groqKey' | 'groqModel' | 'salonAddress'>, fetcher: typeof fetch = fetch) {
   return async (context: Context): Promise<Extraction> => {
     if (!context.messages.some(message => message.type === 'text' && message.text?.trim())) return { atendimento: null, evidencias: [] };
-    if (!config.openaiKey) throw new ExtractionError('missing_openai_key');
+    if (!config.groqKey) throw new ExtractionError('missing_groq_key');
     let response: Response;
     try {
-      response = await fetcher('https://api.openai.com/v1/responses', {
+      response = await fetcher('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST', redirect: 'error', signal: AbortSignal.timeout(30000),
-        headers: { Authorization: `Bearer ${config.openaiKey}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `Bearer ${config.groqKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: config.openaiModel, store: false, reasoning: { effort: 'none' }, max_output_tokens: 3000,
-          instructions, input: JSON.stringify({ context_truncated: context.truncated, messages: context.messages }),
-          text: { format: { type: 'json_schema', name: 'whatsapp_appointment', strict: true, schema: z.toJSONSchema(extractionSchema, { target: 'draft-7' }) } },
+          model: config.groqModel, temperature: 0, reasoning_effort: 'low', max_completion_tokens: 3000, stream: false,
+          messages: [
+            { role: 'system', content: instructions },
+            { role: 'user', content: JSON.stringify({ context_truncated: context.truncated, messages: context.messages }) },
+          ],
+          response_format: { type: 'json_schema', json_schema: {
+            name: 'whatsapp_appointment', strict: true, schema: z.toJSONSchema(extractionSchema, { target: 'draft-7' }),
+          } },
         }),
       });
     } catch { throw new ExtractionError('ai_network_or_timeout'); }
     if (!response.ok) throw new ExtractionError(`ai_http_${response.status}`);
     try {
-      const body = await response.json() as { status?: string; output?: { type: string; content?: { type: string; text?: string }[] }[] };
-      if (body.status !== 'completed') throw new Error('incomplete');
-      const output = body.output?.filter(item => item.type === 'message').flatMap(item => item.content || []) || [];
-      if (output.some(item => item.type === 'refusal')) throw new Error('refused');
-      const text = output.filter(item => item.type === 'output_text').map(item => item.text || '').join('');
-      return normalizeExtraction(JSON.parse(text), context, config.salonAddress);
+      const body = await response.json() as { choices?: {
+        finish_reason?: string;
+        message?: { role?: string; content?: string | null; refusal?: string | null };
+      }[] };
+      const choice = body.choices?.[0];
+      if (choice?.finish_reason !== 'stop') throw new Error('incomplete');
+      if (choice.message?.refusal || choice.message?.role !== 'assistant' || typeof choice.message.content !== 'string') throw new Error('invalid_message');
+      return normalizeExtraction(JSON.parse(choice.message.content), context, config.salonAddress);
     } catch { throw new ExtractionError('invalid_ai_output'); }
   };
 }
