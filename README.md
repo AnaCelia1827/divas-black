@@ -77,6 +77,12 @@ A suíte automatizada cobre separação de previsto/recebido, pagamentos parciai
 
 ## Documentação
 
+### Pitch
+
+A versão atual é `output/presentations/Divas-Black-Pitch-Claro.pptx`, com o estilo do `Pitch.pdf` adaptado para fundo branco: títulos centralizados, destaques rosa, tipografia Inter e faixa colorida no rodapé. Segue os critérios da foto: diagnóstico 25 pontos, funcionalidade 25, co-criação 20, adoção 20 e clareza 10. São cinco slides para quatro minutos e cinco apoios ocultos para as perguntas e o plano B. Roteiro: `presentations/roteiro-pitch-claro.md`; autoria: `presentations/build-pitch-claro.mjs`. As fontes usadas estão em `presentations/assets/fonts`; instale os arquivos TTF no computador da apresentação para preservar a tipografia ao editar no PowerPoint. As capturas continuam identificadas como dados fictícios e o fluxo da solução permanece copiar/colar texto, organizar, revisar e confirmar.
+
+A apresentação em `output/presentations/Divas-Black-Pitch-Texto.pptx` segue a identidade clara. São cinco slides para quatro minutos e quatro slides ocultos de apoio (critérios e capturas reais da demo). O fluxo da solução usa entrada manual por copiar e colar texto, organização dos campos e revisão pela Carina. As notas do apresentador incluem tempos, responsáveis, fontes, limites das simulações e sequência da demonstração. O roteiro também está em `presentations/roteiro-pitch.md`. O link `localhost:3000` funciona apenas no computador com a demo ligada; as capturas ficam incorporadas ao arquivo para o plano B. As capturas atuais mostram um rascunho fictício já preenchido, não comprovam processamento de texto livre. O processo de autoria está em `presentations/build-pitch.mjs` e usa o runtime de apresentações do Codex.
+
 - [Requisitos funcionais e regras de negócio](docs/requisitos.md)
 - [Contrato para API, agente e persistência](docs/integracao.md)
 - [Viabilidade e custos para uma usuária no celular](docs/plano-negocios.md)
