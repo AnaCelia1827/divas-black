@@ -48,6 +48,12 @@ A versão entregue apresenta um `AssistantDraft` fictício e revisável. Não ex
 
 Para a API externa, mapear a conversa para rascunho e permitir revisão. A mensagem de uma cliente dizendo que pagará não autoriza `recordCash`. Não confirmar datas ambíguas automaticamente. Acrescentar ingestão de rascunhos validada na API externa antes de conectar o agente real; o MVP não oferece uma gravação pública irrestrita de `AppData`.
 
+## Exportação e preferências locais
+
+`lib/shopping-pdf.ts` gera o PDF no navegador a partir de `AppData`, início e fim do período, usando o mesmo `getShoppingList`. A geração não chama serviço externo, não cria comandos e não modifica estoque ou caixa. O arquivo usa tabela com estoque, demanda total e quantidade a comprar, incluindo fixos com falta zero.
+
+Tema claro/escuro e menu lateral recolhido são preferências de apresentação salvas no navegador, fora do snapshot operacional e do contrato de comandos. Sem tema explícito salvo, a interface segue `prefers-color-scheme`. Esses estados não exigem novos endpoints nem mudanças no banco. A navegação inferior substitui o menu lateral no celular.
+
 ## Persistência escolhida para o hackathon
 
 Um snapshot tipado em JSONB na tabela `divas_demo_state` mantém cadastros, caixa, estoque e comandos aplicados juntos. A RPC `divas_save_demo` troca o snapshot somente quando `revision` coincide. Em conflito, o servidor relê e reaplica o comando; isso evita perder alterações de duas abas/usuárias e evita pagamento ou compra parcial.
@@ -59,3 +65,5 @@ RLS bloqueia `anon` e `authenticated`; somente o servidor usa chave secret/servi
 ## Verificação realizada
 
 Testes de domínio, armazenamento local e concorrência usam memória/mock. Eles não validam uma instância real do Supabase nem a aplicação da migração. A conexão real exige configurar projeto, SQL e variáveis e executar o fluxo de aceite no ambiente conectado.
+
+A suíte automatizada inclui geração de PDF e testes de interface em DOM simulado. O PDF foi renderizado com PyMuPDF e inspecionado. Isso não equivale a validação visual da aplicação em navegador; screenshots finais da interface não foram obtidos.

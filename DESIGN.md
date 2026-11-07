@@ -19,6 +19,12 @@ colors:
   metric-yellow: "#ecefc7"
   error-background: "#fff0f1"
   error-text: "#9c2034"
+  dark-canvas: "#171417"
+  dark-surface: "#242025"
+  dark-surface-raised: "#30282f"
+  dark-text: "#f4eef2"
+  dark-muted: "#b3a7af"
+  dark-line: "#3e343c"
 typography:
   display:
     fontFamily: "Space Grotesk, sans-serif"
@@ -115,6 +121,7 @@ Esta documentação atualiza a direção inicial com os estilos implementados em
 - Preto e rosa forte como identidade permanente.
 - Cor por serviço, com nome e estado sempre legíveis.
 - Desktop com menu lateral; celular com navegação inferior e opções adicionais.
+- Tema claro/escuro e menu desktop recolhido com preferências locais persistidas.
 
 ## Colors
 
@@ -128,7 +135,9 @@ Os cinco tons `note-*` distinguem serviços na agenda. O cadastro permite outras
 
 ### Neutral
 
-O fundo `canvas` separa os painéis brancos `surface`. `muted` serve a informação secundária; `line` mantém divisórias discretas. Campos e cabeçalhos do painel lateral usam branco. Erros têm superfície rosada e texto escuro próprios.
+O fundo `canvas` separa os painéis brancos `surface`. `muted` serve a informação secundária; `line` mantém divisórias discretas. Campos e cabeçalhos do painel lateral usam branco no tema claro. Erros têm superfície rosada e texto escuro próprios.
+
+O tema escuro usa os tokens `dark-*` para fundo, superfície, texto e divisórias, com ajustes específicos para formulários e indicadores. O rosa da marca e as cores dos post-its continuam identificáveis. A escolha de tema é local e persistida; na ausência de escolha explícita, a interface segue o sistema.
 
 **The Color-and-Text Rule.** Nome do serviço, estado e pagamento precisam continuar compreensíveis sem depender da cor.
 
@@ -152,11 +161,11 @@ As fontes são servidas pelo próprio aplicativo via `@fontsource`, sem requisi�
 
 ## Layout
 
-O menu lateral fixo ocupa 222px no desktop, 195px até 1250px e 174px até 1000px. O conteúdo principal acompanha essas larguras, com margem interna de 34px no desktop e limite de 1900px. Telas largas a partir de 1550px usam margem interna de 48px.
+O menu lateral fixo expandido ocupa 222px no desktop, 195px até 1250px e 174px até 1000px. Pode ser recolhido para liberar área de trabalho, com estado persistido localmente. O conteúdo principal acompanha a largura do menu, com margem interna de 34px no desktop e limite de 1900px. Telas largas a partir de 1550px usam margem interna de 48px.
 
 Até 700px, o menu lateral desaparece; o conteúdo ocupa toda a largura com margem de 17px e espaço inferior reservado. A navegação inferior fixa tem pelo menos 78px e respeita a área segura do dispositivo. As opções adicionais aparecem acima dela. Métricas passam a duas colunas; listas e grades de serviços se reorganizam para leitura no celular.
 
-A semana usa sete colunas com largura mínima de 190px; o mês usa sete colunas de pelo menos 150px. Essas visualizações têm rolagem horizontal própria. O dia usa até três post-its por linha no desktop, dois até 1000px e uma coluna abaixo de 370px.
+A semana usa sete colunas com largura mínima de 190px; o mês usa sete colunas de pelo menos 150px. Essas visualizações têm rolagem horizontal própria. O dia usa até três post-its por linha no desktop e dois até 1000px; no celular, os cartões de atendimento ficam em uma coluna, incluindo o resumo inicial.
 
 O painel de operação mede no máximo 560px de largura e ocupa 100dvh; tem cabeçalho fixo durante sua rolagem interna. Até 560px, margens internas e fontes dos campos ficam mais compactas.
 
@@ -170,7 +179,7 @@ Sombras e movimento exatos estão em `.impeccable/design.json`. Transições de 
 
 Botões principais de página usam cantos de 9px; campos e botões do painel usam 12px; painéis usam aproximadamente 15px. Indicadores pequenos alternam círculos e pílulas. Post-its têm três cantos discretos e canto inferior direito dobrado, mantendo a aparência de papel.
 
-O post-it padrão tem proporção preferida de 1:1,05; o dia no desktop aproxima-se de 1:1,02. No celular, o padrão é 1:1,11 e a visualização diária usa 1:1,13. O resumo usa 1:1,06 no desktop e 1:1,09 no celular. Abaixo de 370px, o cartão fica em uma coluna com proporção 1,25:1. A altura pode crescer para acomodar conteúdo; o mês mantém cartões mais compactos, sem proporção fixa.
+O post-it padrão do desktop tem proporção preferida de 1:1,05; o dia aproxima-se de 1:1,02, e o resumo usa 1:1,06. No celular, os cartões ficam em uma coluna; preserve papel compacto e conteúdo legível, permitindo altura crescer conforme necessário. O mês mantém cartões menores, sem proporção fixa.
 
 ## Components
 
@@ -182,7 +191,7 @@ Hover mantém mudança discreta de fundo ou brilho. Foco global usa contorno ros
 
 ### Cards / Containers
 
-Painéis brancos usam borda clara e preenchimento de 25px, com ajuste no celular. Métricas combinam preto, branco, rosa claro e amarelo claro. Cartões de serviço exibem cor, nome, preço e duração; a lista de compra realça a quantidade faltante.
+Painéis usam borda clara e preenchimento de 25px, com ajuste no celular e superfícies próprias no tema escuro. Métricas combinam preto, branco, rosa claro e amarelo claro. Cartões de serviço exibem cor, nome, preço, custo estimado e duração; estimativas ficam visualmente separadas do caixa real e da ação “Adicionar custo”. A lista de compra realça a quantidade faltante, distingue complemento manual e identifica itens fixos.
 
 ### Inputs / Fields
 
@@ -192,6 +201,8 @@ Campos do painel têm borda neutra, altura mínima de 52px e preenchimento do fr
 
 Menu lateral preto com ícone e nome; item ativo rosa e texto preto. No celular, a navegação inferior branca usa texto e ícone ativos em rosa escuro, com alvos de pelo menos 50px de altura. O menu adicional é preto, acima da barra inferior.
 
+O menu desktop pode ser recolhido. Os controles de tema e recolhimento mantêm rótulos acessíveis; a versão compacta preserva acesso às mesmas telas. A saudação aparece apenas no início; a agenda usa cabeçalho curto, sem subtítulo redundante.
+
 ### Post-its
 
 Cada atendimento mostra horário, cliente, serviço, estado e informação de pagamento. Cor e nome do serviço vêm do snapshot do atendimento. A dobra é feita em CSS. Preserve as proporções quase quadradas documentadas em Shapes; não retornar aos cartões longos da primeira versão. O mês reduz detalhes para manter a consulta de datas.
@@ -199,6 +210,10 @@ Cada atendimento mostra horário, cliente, serviço, estado e informação de pa
 ### Operation Panel
 
 Painel lateral com título visível, fechar por botão/Escape, foco levado ao diálogo e retorno ao gatilho ao fechar. Formulários apresentam poucos campos principais e revelam materiais do serviço em seção expansível. Cancelamento e ausência pedem confirmação dentro do painel.
+
+### Shopping List / PDF
+
+A lista combina demanda da agenda, complemento manual e estoque mínimo. Pomada/Mousse aparecem com selo de item fixo mesmo sem falta, usando estado de estoque suficiente. A exportação local conserva o período e os valores da lista. O PDF A4 usa preto, rosa, tabela de leitura direta e Helvetica para impressão; sua aparência foi inspecionada separadamente da interface.
 
 ## Do's and Don'ts
 

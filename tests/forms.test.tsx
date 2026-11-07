@@ -82,4 +82,17 @@ describe('formulários rápidos',()=>{
   expect(document.activeElement).toBe(screen.getByRole('dialog'));
   await user.keyboard('{Escape}');expect(closed).toHaveBeenCalledOnce();
  });
+ it('salva o custo estimado no serviço como estimativa',async()=>{
+  const user=userEvent.setup();const saved=vi.fn();
+  render(<Harness operation={{kind:'service',service:seed().services[0]}} saved={saved}/>);
+  const cost=screen.getByLabelText('Custo estimado · R$');await user.clear(cost);await user.type(cost,'80');
+  await user.click(screen.getByRole('button',{name:'Salvar'}));
+  expect(saved).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({type:'saveService',service:expect.objectContaining({costCents:8000,priceCents:32000})}));
+ });
+ it('editar um material preserva demanda extra e presença fixa na lista',async()=>{
+  const user=userEvent.setup();const saved=vi.fn();
+  render(<Harness operation={{kind:'material',material:{...seed().materials[0],manualDemand:3,alwaysOnShoppingList:true}}} saved={saved}/>);
+  await user.click(screen.getByRole('button',{name:'Salvar'}));
+  expect(saved).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({type:'saveMaterial',material:expect.objectContaining({manualDemand:3,alwaysOnShoppingList:true})}));
+ });
 });

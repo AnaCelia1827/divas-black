@@ -86,9 +86,9 @@ function ServiceForm({service,data,busy,save,close}:FormProps & {service?:Servic
 
 function MaterialForm({material,busy,save,close}:FormProps & {material?:Material}) {
  const [id]=useState(material?.id??uid);const [commandId]=useState(uid);
- return <form className="op-form" onSubmit={async event=>{event.preventDefault();const f=valueOf(event);if(await save({commandId,type:'saveMaterial',material:{id,name:stringOf(f,'name'),unit:stringOf(f,'unit'),quantity:material?.quantity??Number(f.get('quantity')),minimum:Number(f.get('minimum')),active:material?.active??true}}))close();}}>
+ return <form className="op-form" onSubmit={async event=>{event.preventDefault();const f=valueOf(event);if(await save({commandId,type:'saveMaterial',material:{...material,id,name:stringOf(f,'name'),unit:stringOf(f,'unit'),quantity:material?.quantity??Number(f.get('quantity')),minimum:Number(f.get('minimum')),active:material?.active??true}}))close();}}>
  <Field label="Nome do material"><input name="name" required maxLength={120} defaultValue={material?.name} placeholder="Ex.: Fibra jumbo · preto"/></Field>
- <Field label="Unidade"><select name="unit" defaultValue={material?.unit??'pacote'}>{['pacote','pote','unidade','litro','kg','grama','ml'].map(u=><option key={u}>{u}</option>)}</select></Field>
+ <Field label="Unidade"><select name="unit" defaultValue={material?.unit??'pacote'}>{Array.from(new Set([material?.unit??'pacote','pacote','pote','frasco','unidade','litro','kg','grama','ml'])).map(u=><option key={u}>{u}</option>)}</select></Field>
  <div className="op-columns"><Field label="Quantidade atual"><input name="quantity" type="number" min="0" step="0.001" required disabled={Boolean(material)} defaultValue={material?.quantity??0}/></Field><Field label="Estoque mínimo"><input name="minimum" type="number" min="0" step="0.001" required defaultValue={material?.minimum??1}/></Field></div>
  {material&&<p className="op-hint">Para alterar a quantidade, registre uma compra, uso ou ajuste.</p>}<Submit busy={busy}/></form>;
 }

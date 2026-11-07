@@ -19,6 +19,8 @@ Aplicativo operacional para Carina organizar clientes, atendimentos, caixa e mat
 | RF11 | Mostrar sugestão simulada da assistente; revisar os campos e confirmar uma única vez. |
 | RF12 | Salvar demonstração no navegador ou, quando configurado, em banco compartilhado Supabase. |
 | RF13 | Funcionar em celular e computador com navegação curta, números grandes e ações rápidas. |
+| RF14 | Baixar PDF da lista de compra do período no navegador, incluindo demanda automática, manual e materiais fixos, sem envio para geração externa. |
+| RF15 | Alternar tema claro/escuro e recolher o menu lateral no desktop, preservando preferências locais; usar tema do sistema quando não houver escolha salva. |
 
 ## Regras de negócio
 
@@ -39,6 +41,8 @@ Aplicativo operacional para Carina organizar clientes, atendimentos, caixa e mat
 - **RN15 — Escopo da compra:** toda compra registrada já foi paga. Compras a prazo, contas recorrentes, fornecedores, entregas futuras e reservas físicas ficam para evolução.
 - **RN16 — Dois tipos de custo:** “Adicionar custo” registra despesa efetivamente paga no caixa. Custo estimado de serviço/atendimento é informativo: não gera saída de caixa, não muda estoque e não representa automaticamente lucro. Valores em centavos inteiros não negativos. Campo ausente em dados antigos permanece compatível, usando zero quando necessário.
 - **RN17 — Materiais fixos e dados antigos:** ao ler uma demonstração existente, acrescentar Pomada/Mousse somente quando ausentes e reutilizar cadastro de mesmo nome sem distinguir maiúsculas. Preservar IDs, saldos, mínimos e demanda manual; marcar os fixos ativos e visíveis na lista. Os saldos iniciais zero e mínimos de uma unidade são exemplos fictícios ajustáveis. Não redefinir os demais dados da usuária.
+- **RN18 — Exportação:** o PDF usa a mesma lista e período consultados, com estoque, demanda e quantidade faltante; materiais fixos continuam presentes com falta zero. Gerar e baixar o arquivo não altera estoque ou caixa e não transmite os dados para serviço de conversão.
+- **RN19 — Apresentação:** tema e menu recolhido são preferências locais do navegador, independentes dos dados operacionais. No celular, cartões de atendimento ficam em uma coluna. Saudação apenas no início; cabeçalho da agenda sem subtítulo redundante.
 
 ## Fora desta entrega
 
@@ -55,3 +59,6 @@ Login, perfis de equipe, integração real de WhatsApp, agente de IA real, proce
 7. Confirmar a mesma sugestão/comando duas vezes: somente um efeito.
 8. Operar em 390 px e desktop sem rolagem horizontal da página e com controles legíveis.
 9. Cadastrar custo estimado no serviço e ajustar no atendimento: preservar o histórico após editar o cadastro e não criar saída no caixa. Registrar custo efetivo pela ação própria: aumentar gasto do período uma única vez.
+10. Somar demanda extra manual e ver Pomada/Mousse mesmo com estoque suficiente; exportar o mesmo período em PDF sem alterar registros.
+11. Alternar o tema, recarregar e manter a escolha; sem escolha salva, usar a preferência do sistema.
+12. Recolher o menu desktop e manter a escolha após recarregar; no celular, usar navegação inferior e cartões de atendimento em uma coluna.

@@ -6,6 +6,8 @@ Custos entram de duas formas: “Adicionar custo” registra uma despesa paga do
 
 A lista de compra soma a demanda da agenda ao complemento manual de cada material. Pomada e Mousse permanecem na lista mesmo com estoque suficiente; demonstrações já salvas recebem esses itens sem resetar cadastros ou quantidades existentes.
 
+“Baixar PDF” exporta a lista do período diretamente no navegador, sem enviar os dados para geração externa. O aplicativo também oferece modo escuro com preferência salva e padrão inicial do sistema; no desktop, o menu lateral pode ser recolhido e mantém a escolha. No celular, os cartões de atendimento aparecem em uma coluna.
+
 ## Executar
 
 Requer Node.js 24.15 ou superior na linha 24 LTS. O projeto está configurado para Node.js 24 na Vercel.
@@ -45,7 +47,7 @@ npm test
 npm run build
 ```
 
-Os testes cobrem separação de previsto/recebido, pagamentos parciais, reembolso, conflitos de agenda, custos estimados sem impacto no caixa, snapshots históricos, lista de compra, atualização atômica de compra/caixa, persistência, validação e concorrência. A suíte também verifica rotas da API, carregamento e erros do hook, navegação e formulários em DOM simulado, incluindo cadastro de cliente durante o agendamento. Testes de banco usam um armazenamento simulado com compare-and-swap; nenhuma conexão real é presumida. Testes de DOM/HTTP não substituem validação visual por screenshots da interface final.
+A suíte automatizada cobre separação de previsto/recebido, pagamentos parciais, reembolso, conflitos de agenda, custos estimados sem impacto no caixa, snapshots históricos, demanda manual e itens fixos da lista de compra, geração de PDF, atualização atômica de compra/caixa, persistência, validação e concorrência. Também verifica rotas da API, carregamento e erros do hook, navegação e formulários em DOM simulado, incluindo cadastro de cliente durante o agendamento. Testes de banco usam armazenamento simulado com compare-and-swap; nenhuma conexão real é presumida. O PDF foi renderizado com PyMuPDF e inspecionado separadamente. Testes de DOM/HTTP não substituem validação visual por screenshots da interface final no navegador, que não foi realizada.
 
 ## Documentação
 
