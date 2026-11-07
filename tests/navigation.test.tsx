@@ -16,6 +16,34 @@ beforeEach(()=>{
 afterEach(()=>{cleanup();vi.restoreAllMocks();vi.unstubAllGlobals();});
 
 describe('navegação e fluxos do aplicativo',()=>{
+ it('edita preços de Pomada e Mousse, preserva ao reabrir e sugere total da compra ajustável',async()=>{
+  const user=userEvent.setup();const first=render(<Page/>);await screen.findByRole('heading',{name:/^Oi, Diva\./});
+  await navigate(user,'Materiais');
+  const initial=JSON.parse(localStorage.getItem(DEMO_STORAGE_KEY)!) as AppData;
+  for(const [name,unit,price] of [['Pomada','pote','25.90'],['Mousse','frasco','32.50']]){
+   await user.click(screen.getByRole('button',{name:`Definir preço de ${name}`}));
+   const dialog=within(screen.getByRole('dialog'));
+   await user.type(dialog.getByLabelText(`Preço por ${unit} · R$`),price);
+   await user.click(dialog.getByRole('button',{name:'Salvar preço'}));
+   await waitFor(()=>expect(screen.queryByRole('dialog')).toBeNull());
+  }
+  first.unmount();render(<Page/>);await screen.findByRole('heading',{name:/^Oi, Diva\./});await navigate(user,'Materiais');
+  expect(screen.getByRole('button',{name:'Editar preço de Mousse'})).toBeDefined();
+  const priceButton=screen.getByRole('button',{name:'Editar preço de Pomada'});const card=within(priceButton.closest('article')!);
+  expect(card.getByText(/Compra prevista: R\$\s*25,90/)).toBeDefined();
+  await user.click(card.getByRole('button',{name:'Registrar compra'}));
+  expect((screen.getByLabelText('Valor total pago · R$') as HTMLInputElement).value).toBe('25.90');
+  await user.clear(screen.getByLabelText('Quantidade'));await user.type(screen.getByLabelText('Quantidade'),'2');
+  expect((screen.getByLabelText('Valor total pago · R$') as HTMLInputElement).value).toBe('51.80');
+  await user.clear(screen.getByLabelText('Valor total pago · R$'));await user.type(screen.getByLabelText('Valor total pago · R$'),'48');
+  await user.click(within(screen.getByRole('dialog')).getByRole('button',{name:'Registrar compra'}));
+  await waitFor(()=>expect(screen.queryByRole('dialog')).toBeNull());
+  const saved=JSON.parse(localStorage.getItem(DEMO_STORAGE_KEY)!) as AppData;
+  expect(saved.materials.find(m=>m.id==='mat-pomada')).toMatchObject({unitPriceCents:2590,quantity:2,alwaysOnShoppingList:true});
+  expect(saved.materials.find(m=>m.id==='mat-mousse')?.unitPriceCents).toBe(3250);
+  expect(saved.cashMovements).toHaveLength(initial.cashMovements.length+1);
+  expect(saved.cashMovements.at(-1)?.amountCents).toBe(4800);
+ });
  it('abre as sete telas sem atalhos sem destino',async()=>{
   const user=userEvent.setup();render(<Page/>);
   await screen.findByRole('heading',{name:/^Oi, Diva\./});

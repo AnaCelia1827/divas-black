@@ -12,6 +12,23 @@ function appointment(id = 'booking', startAt = '2026-11-07T09:00:00-03:00'): Com
 function payment(id: string, amountCents: number): Command { return { commandId: `cash-${id}`, type: 'recordCash', movement: { id, appointmentId: 'booking', direction: 'in', amountCents, date: '2026-11-07', category: 'Serviços', description: '' } }; }
 
 describe('agenda e caixa', () => {
+  it('estima a compra pelo preço editável sem modificar despesas anteriores e distingue preço ausente de zero', () => {
+    let data = applyCommand(empty(), { commandId: 'pomada-purchase', type: 'recordStock', movement: { id: 'price-purchase', materialId: 'mat-pomada', kind: 'purchase', quantity: 5, costCents: 5000, date: '2026-11-07', notes: '' } }, now);
+    const material = data.materials.find(item => item.id === 'mat-pomada')!;
+    expect(material.unitPriceCents).toBeUndefined();
+    data = applyCommand(data, { commandId: 'pomada-price', type: 'saveMaterial', material: { ...material, manualDemand: 7, unitPriceCents: 2590 } }, now);
+    expect(getShoppingList(data, '2026-11-07', '2026-11-14').find(item => item.material.id === material.id)).toMatchObject({ shortage: 3, estimatedCostCents: 7770 });
+    expect(parseAppData(JSON.parse(JSON.stringify(data))).materials.find(item => item.id === material.id)?.unitPriceCents).toBe(2590);
+    expect(data.cashMovements).toHaveLength(1);
+    expect(data.cashMovements[0].amountCents).toBe(5000);
+    expect(data.stockMovements[0].costCents).toBe(5000);
+    const priced = data.materials.find(item => item.id === material.id)!;
+    const free = applyCommand(data, { commandId: 'zero-price', type: 'saveMaterial', material: { ...priced, unitPriceCents: 0 } }, now);
+    expect(getShoppingList(free, '2026-11-07', '2026-11-14').find(item => item.material.id === material.id)?.estimatedCostCents).toBe(0);
+    const cleared = applyCommand(data, { commandId: 'clear-price', type: 'saveMaterial', material: { ...priced, unitPriceCents: undefined } }, now);
+    expect(getShoppingList(cleared, '2026-11-07', '2026-11-14').find(item => item.material.id === material.id)?.estimatedCostCents).toBeUndefined();
+    for (const unitPriceCents of [-1, 0.5]) expect(() => parseCommand({ commandId: 'bad-price', type: 'saveMaterial', material: { ...priced, unitPriceCents } })).toThrow();
+  });
   it('separa previsão, sinal e restante sem duplicar ao concluir', () => {
     let data = applyCommand(empty(), appointment(), now);
     expect(getFinancialSummary(data, '2026-11-01', '2026-11-30')).toEqual({ received: 0, spent: 0, balance: 0, receivable: 30000 });

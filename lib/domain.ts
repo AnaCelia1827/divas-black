@@ -21,7 +21,7 @@ export function getFinancialSummary(data: AppData, from: string, to: string): Fi
   const receivable = data.appointments.filter(item => item.status !== 'cancelled' && item.status !== 'noshow' && localDate(item.startAt) >= from && localDate(item.startAt) <= to).reduce((total, item) => total + getAppointmentBalance(data, item.id), 0);
   return { received, spent, balance: received - spent, receivable };
 }
-export function getShoppingList(data: AppData, from: string, to: string): { material: Material; demand: number; shortage: number }[] {
+export function getShoppingList(data: AppData, from: string, to: string): { material: Material; demand: number; shortage: number; estimatedCostCents?: number }[] {
   dateSchema.parse(from); dateSchema.parse(to);
   if (from > to) throw new Error('O início do período deve vir antes do fim.');
   const demand = new Map<string, number>();
@@ -31,7 +31,8 @@ export function getShoppingList(data: AppData, from: string, to: string): { mate
   }
   return data.materials.filter(item => item.active).map(material => {
     const totalDemand = (demand.get(material.id) ?? 0) + (material.manualDemand ?? 0);
-    return { material, demand: totalDemand, shortage: Math.max(0, Math.round((totalDemand + material.minimum - material.quantity) * 1000) / 1000) };
+    const shortage = Math.max(0, Math.round((totalDemand + material.minimum - material.quantity) * 1000) / 1000);
+    return { material, demand: totalDemand, shortage, estimatedCostCents: material.unitPriceCents === undefined ? undefined : Math.round(shortage * material.unitPriceCents) };
   }).filter(item => item.shortage > 0 || item.material.alwaysOnShoppingList);
 }
 function checkConflict(data: AppData, appointment: Appointment) {

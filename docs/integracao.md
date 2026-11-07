@@ -62,6 +62,8 @@ Tema claro/escuro e menu lateral recolhido são preferências de apresentação 
 
 ## Persistência escolhida para o hackathon
 
+`Material.unitPriceCents?: number` é o preço de referência por unidade, em centavos. O comando `saveMaterial` existente salva/limpa esse campo nos dois adaptadores, sem migração SQL adicional no snapshot JSONB. Ausente significa não informado e zero é válido. `getShoppingList` retorna também `estimatedCostCents?: number`, calculado com a quantidade faltante. O total pago em `recordStock` continua independente: mudar o preço não reescreve compras ou movimentos do caixa. A previsão aparece na interface; o PDF atual conserva seu formato de quantidades.
+
 Um snapshot tipado em JSONB na tabela `divas_demo_state` mantém cadastros, caixa, estoque e comandos aplicados juntos. A RPC `divas_save_demo` troca o snapshot somente quando `revision` coincide. Em conflito, o servidor relê e reaplica o comando; isso evita perder alterações de duas abas/usuárias e evita pagamento ou compra parcial.
 
 Esta é uma arquitetura deliberada para o MVP de um único salão, não uma modelagem analítica definitiva. Na evolução, migrar coleções para tabelas normalizadas e comandos para transações de banco, preservando o contrato. Antes de dados reais, adicionar autenticação, autorização por salão e trilha de auditoria.

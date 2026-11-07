@@ -141,4 +141,5 @@ html[data-theme='dark'] ::-webkit-scrollbar-thumb{background:#69515f}
 }
 
 .cash-topline{flex-wrap:wrap}.cash-actions{flex-wrap:wrap;justify-content:flex-end}.cash-actions .export-button{white-space:nowrap}.cash-actions .export-button:disabled{cursor:not-allowed}.cash-actions .export-button[aria-busy=true]{cursor:wait}
+.shopping-pricing{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 16px;margin-top:16px;font-size:16px;line-height:1.5}.shopping-pricing strong{font-weight:600;font-variant-numeric:tabular-nums}.shopping-item-actions{flex-wrap:wrap;gap:12px}.shopping-item-actions>.text-button{min-height:48px}
 @media(max-width:700px){.cash-actions{flex-direction:column;align-items:stretch;width:100%}.cash-actions>.button{flex:none;width:100%;min-height:50px;justify-content:center}}

@@ -22,6 +22,7 @@ Aplicativo operacional para Carina organizar clientes, atendimentos, caixa e mat
 | RF14 | Baixar PDF da lista de compra do período no navegador, incluindo demanda automática, manual e materiais fixos, sem envio para geração externa. |
 | RF15 | Alternar tema claro/escuro e recolher o menu lateral no desktop, preservando preferências locais; usar tema do sistema quando não houver escolha salva. |
 | RF16 | Exportar Excel financeiro com sete abas, filtros visíveis, datas/valores tipados, fórmulas com resultados calculados e totais conciliáveis. |
+| RF17 | Definir e editar preço por unidade dos materiais, incluindo Pomada e Mousse, diretamente na lista de compras; calcular a previsão da compra e sugerir o total ao registrar pagamento. |
 
 ## Regras de negócio
 
@@ -45,6 +46,7 @@ Aplicativo operacional para Carina organizar clientes, atendimentos, caixa e mat
 - **RN18 — Exportação:** o PDF usa a mesma lista e período consultados, com estoque, demanda e quantidade faltante; materiais fixos continuam presentes com falta zero. Gerar e baixar o arquivo não altera estoque ou caixa e não transmite os dados para serviço de conversão.
 - **RN19 — Apresentação:** tema e menu recolhido são preferências locais do navegador, independentes dos dados operacionais. No celular, cartões de atendimento ficam em uma coluna. Saudação apenas no início; cabeçalho da agenda sem subtítulo redundante.
 - **RN20 — Excel financeiro:** Movimentações, Categorias e Fluxo mensal seguem todos os filtros de data/tipo/categoria; Resumo identifica esse recorte. Atendimentos, A receber e Serviços usam todos os atendimentos das datas selecionadas, em São Paulo, independentemente do tipo/categoria do caixa. Saldo atual usa recebimentos menos reembolsos de todas as datas e é zero para cancelados/ausências. Estimativas do Resumo e Serviços consideram apenas confirmados/concluídos; custo desconhecido não vira custo zero. O histórico mantém todos os estados, valores e IDs, com custos ausentes em branco. Fórmulas têm resultados salvos para leitura imediata e recalculam ao abrir em Excel. Exportar não altera dados nem usa conversão externa.
+- **RN21 — Preço do material:** preço unitário opcional em centavos, não negativo; ausência de preço é diferente de zero. A previsão é quantidade faltante × preço unitário, arredondada ao centavo. Alterar preço não muda estoque nem despesas anteriores. Na compra, o total sugerido pode ser corrigido; somente confirmar a compra registra a saída real. Preços de cadastros antigos continuam não informados até edição.
 
 ## Fora desta entrega
 

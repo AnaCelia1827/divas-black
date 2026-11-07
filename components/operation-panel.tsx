@@ -14,6 +14,7 @@ export type Operation =
  | { kind: 'service'; service?: Service }
  | { kind: 'cash'; direction: 'in' | 'out'; appointmentId?: string }
  | { kind: 'material'; material?: Material }
+ | { kind: 'materialPrice'; materialId: string }
  | { kind: 'stock'; materialId?: string; stockKind?: StockMovement['kind']; quantity?: number }
  | { kind: 'demand'; materialId?: string }
  | { kind: 'refund'; appointmentId: string };
@@ -42,7 +43,7 @@ export function OperationPanel({ operation, onClose, data, busy, error, onComman
   return () => { document.body.style.overflow = previousOverflow; previousFocus?.focus(); };
  }, [isOpen]);
  if (!operation || !current) return null;
- const titles: Record<Operation['kind'], string> = { appointment: current.kind === 'appointment' && current.appointment ? 'Editar atendimento' : 'Novo atendimento', appointmentDetail: 'Seu atendimento', client: current.kind === 'client' && current.client ? 'Editar cliente' : 'Nova cliente', clientDetail: 'Histórico da cliente', service: current.kind === 'service' && current.service ? 'Editar serviço' : 'Novo serviço', cash: current.kind === 'cash' && current.direction === 'out' ? 'Adicionar custo' : 'Registrar entrada', material: current.kind === 'material' && current.material ? 'Editar material' : 'Novo material', stock: 'Movimentar material', demand: 'Adicionar demanda', refund: 'Reembolsar pagamento' };
+ const titles: Record<Operation['kind'], string> = { appointment: current.kind === 'appointment' && current.appointment ? 'Editar atendimento' : 'Novo atendimento', appointmentDetail: 'Seu atendimento', client: current.kind === 'client' && current.client ? 'Editar cliente' : 'Nova cliente', clientDetail: 'Histórico da cliente', service: current.kind === 'service' && current.service ? 'Editar serviço' : 'Novo serviço', cash: current.kind === 'cash' && current.direction === 'out' ? 'Adicionar custo' : 'Registrar entrada', material: current.kind === 'material' && current.material ? 'Editar material' : 'Novo material', materialPrice: 'Preço do material', stock: 'Movimentar material', demand: 'Adicionar demanda', refund: 'Reembolsar pagamento' };
  const navigate = (next: Operation) => { setCurrent(next); setLocalError(''); panel.current?.focus(); };
  const save = async (command: Command) => { const ok = await onCommand(command); setLocalError(ok ? '' : 'Não foi possível salvar. Confira os dados e tente novamente.'); return ok; };
  const props: FormProps = { data, busy, save, close: onClose, navigate };
@@ -55,6 +56,7 @@ export function OperationPanel({ operation, onClose, data, busy, error, onComman
  {current.kind === 'clientDetail' && <ClientHistory {...props} client={current.client}/>}
  {current.kind === 'service' && <ServiceForm key={current.service?.id ?? 'new-service'} {...props} service={current.service}/>}
  {current.kind === 'material' && <MaterialForm key={current.material?.id ?? 'new-material'} {...props} material={current.material}/>}
+ {current.kind === 'materialPrice' && <MaterialPriceForm key={current.materialId} {...props} materialId={current.materialId}/>}
  {current.kind === 'cash' && <CashForm key={`${current.direction}-${current.appointmentId}`} {...props} direction={current.direction} appointmentId={current.appointmentId}/>}
  {current.kind === 'stock' && <StockForm key={`${current.materialId}-${current.stockKind}`} {...props} operation={current}/>}
  {current.kind === 'demand' && <DemandForm key={current.materialId??'new-demand'} {...props} materialId={current.materialId}/>}
@@ -86,11 +88,20 @@ function ServiceForm({service,data,busy,save,close}:FormProps & {service?:Servic
 
 function MaterialForm({material,busy,save,close}:FormProps & {material?:Material}) {
  const [id]=useState(material?.id??uid);const [commandId]=useState(uid);
- return <form className="op-form" onSubmit={async event=>{event.preventDefault();const f=valueOf(event);if(await save({commandId,type:'saveMaterial',material:{...material,id,name:stringOf(f,'name'),unit:stringOf(f,'unit'),quantity:material?.quantity??Number(f.get('quantity')),minimum:Number(f.get('minimum')),active:material?.active??true}}))close();}}>
+ return <form className="op-form" onSubmit={async event=>{event.preventDefault();const f=valueOf(event);if(await save({commandId,type:'saveMaterial',material:{...material,id,name:stringOf(f,'name'),unit:stringOf(f,'unit'),quantity:material?.quantity??Number(f.get('quantity')),minimum:Number(f.get('minimum')),active:material?.active??true,unitPriceCents:stringOf(f,'unitPrice')===''?undefined:centsFromInput(stringOf(f,'unitPrice'))}}))close();}}>
  <Field label="Nome do material"><input name="name" required maxLength={120} defaultValue={material?.name} placeholder="Ex.: Fibra jumbo · preto"/></Field>
  <Field label="Unidade"><select name="unit" defaultValue={material?.unit??'pacote'}>{Array.from(new Set([material?.unit??'pacote','pacote','pote','frasco','unidade','litro','kg','grama','ml'])).map(u=><option key={u}>{u}</option>)}</select></Field>
+ <Field label="Preço por unidade · R$ · opcional"><input name="unitPrice" type="number" inputMode="decimal" min="0" max="1000000" step="0.01" defaultValue={material?.unitPriceCents===undefined?'':moneyInput(material.unitPriceCents)}/></Field>
  <div className="op-columns"><Field label="Quantidade atual"><input name="quantity" type="number" min="0" step="0.001" required disabled={Boolean(material)} defaultValue={material?.quantity??0}/></Field><Field label="Estoque mínimo"><input name="minimum" type="number" min="0" step="0.001" required defaultValue={material?.minimum??1}/></Field></div>
  {material&&<p className="op-hint">Para alterar a quantidade, registre uma compra, uso ou ajuste.</p>}<Submit busy={busy}/></form>;
+}
+
+function MaterialPriceForm({materialId,data,busy,save,close}:FormProps & {materialId:string}) {
+ const [commandId]=useState(uid);const material=data.materials.find(item=>item.id===materialId);
+ if(!material)return <Empty>Esse material não foi encontrado.</Empty>;
+ return <form className="op-form" onSubmit={async event=>{event.preventDefault();const f=valueOf(event);const value=stringOf(f,'unitPrice');if(await save({commandId,type:'saveMaterial',material:{...material,unitPriceCents:value===''?undefined:centsFromInput(value)}}))close();}}>
+ <h3>{material.name}</h3><Field label={`Preço por ${material.unit} · R$`}><input name="unitPrice" type="number" inputMode="decimal" min="0" max="1000000" step="0.01" defaultValue={material.unitPriceCents===undefined?'':moneyInput(material.unitPriceCents)} placeholder="Ex.: 25,90"/></Field>
+ <p className="op-hint">Usado na previsão da compra. Deixe vazio para retirar o preço.</p><Submit busy={busy}>Salvar preço</Submit></form>;
 }
 
 function CashForm({direction,appointmentId,data,busy,save,close}:FormProps & {direction:'in'|'out';appointmentId?:string}) {
@@ -106,12 +117,14 @@ function CashForm({direction,appointmentId,data,busy,save,close}:FormProps & {di
 
 function StockForm({operation,data,busy,save,close}:FormProps & {operation:Extract<Operation,{kind:'stock'}>}) {
  const [id]=useState(uid);const [commandId]=useState(uid);const [kind,setKind]=useState<StockMovement['kind']>(operation.stockKind??'purchase');
+ const [materialId,setMaterialId]=useState(operation.materialId??'');const [quantity,setQuantity]=useState(String(operation.quantity??1));const [paidOverride,setPaidOverride]=useState<string|null>(null);
+ const material=data.materials.find(item=>item.id===materialId);const estimated=material?.unitPriceCents===undefined||!quantity||Number(quantity)<=0?undefined:Math.round(material.unitPriceCents*Number(quantity));const paid=paidOverride??(estimated===undefined?'':moneyInput(estimated));
  return <form className="op-form" onSubmit={async event=>{event.preventDefault();const f=valueOf(event);if(await save({commandId,type:'recordStock',movement:{id,kind,materialId:stringOf(f,'material'),quantity:Number(f.get('quantity')),date:stringOf(f,'date'),costCents:kind==='purchase'?centsFromInput(stringOf(f,'cost')):0,notes:stringOf(f,'notes')}}))close();}}>
- <Field label="Material"><select name="material" required defaultValue={operation.materialId??''}><option value="" disabled>Escolha o material</option>{data.materials.filter(m=>m.active).map(m=><option key={m.id} value={m.id}>{m.name} · {m.quantity} {m.unit}</option>)}</select></Field>
+ <Field label="Material"><select name="material" required value={materialId} onChange={e=>{setMaterialId(e.target.value);setPaidOverride(null);}}><option value="" disabled>Escolha o material</option>{data.materials.filter(m=>m.active).map(m=><option key={m.id} value={m.id}>{m.name} · {m.quantity} {m.unit}</option>)}</select></Field>
  <Field label="O que aconteceu?"><select value={kind} onChange={e=>setKind(e.target.value as StockMovement['kind'])}><option value="purchase">Comprei e paguei</option><option value="consumption">Usei no salão</option><option value="adjustment">Ajustar quantidade</option></select></Field>
- <Field label={kind==='adjustment'?'Quantidade a somar ou retirar':'Quantidade'}><input name="quantity" type="number" min={kind==='adjustment'?undefined:'0.001'} step="0.001" required defaultValue={operation.quantity??1}/></Field>
+ <Field label={kind==='adjustment'?'Quantidade a somar ou retirar':'Quantidade'}><input name="quantity" type="number" min={kind==='adjustment'?undefined:'0.001'} step="0.001" required value={quantity} onChange={e=>setQuantity(e.target.value)}/></Field>
  {kind==='adjustment'&&<p className="op-hint">Ex.: 2 acrescenta duas unidades; -2 retira duas.</p>}
- {kind==='purchase'&&<><Field label="Valor total pago · R$"><input name="cost" type="number" inputMode="decimal" min="0.01" step="0.01" required/></Field><p className="op-hint">A compra também será registrada como saída no caixa.</p></>}
+ {kind==='purchase'&&<><Field label="Valor total pago · R$"><input name="cost" type="number" inputMode="decimal" min="0.01" step="0.01" required value={paid} onChange={e=>setPaidOverride(e.target.value)}/></Field><p className="op-hint">{material?.unitPriceCents!==undefined?'Valor sugerido pelo preço cadastrado. Confira quanto pagou. ':''}A compra também será registrada como saída no caixa.</p></>}
  <Field label="Data"><input name="date" type="date" required defaultValue={dateKey()}/></Field><Field label="Observação · opcional"><input name="notes" maxLength={2000}/></Field><Submit busy={busy}>{kind==='purchase'?'Registrar compra':kind==='consumption'?'Registrar uso':'Salvar ajuste'}</Submit></form>;
 }
 

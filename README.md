@@ -6,6 +6,8 @@ Custos entram de duas formas: “Adicionar custo” registra uma despesa paga do
 
 A lista de compra soma a demanda da agenda ao complemento manual de cada material. Pomada e Mousse permanecem na lista mesmo com estoque suficiente; demonstrações já salvas recebem esses itens sem resetar cadastros ou quantidades existentes.
 
+Em cada item, “Definir preço”/“Editar preço” salva o preço por unidade e mostra a compra prevista. Pomada e Mousse também permitem essa edição. Registrar compra sugere o total pela quantidade, com correção manual antes de confirmar; alterar a referência não cria despesa nem modifica o histórico. O campo também está no cadastro de material e permanece salvo no adaptador selecionado.
+
 “Baixar PDF” exporta a lista do período diretamente no navegador, sem enviar os dados para geração externa. O aplicativo também oferece modo escuro com preferência salva e padrão inicial do sistema; no desktop, o menu lateral pode ser recolhido e mantém a escolha. No celular, os cartões de atendimento aparecem em uma coluna.
 
 No Caixa, “Exportar planilha” baixa uma planilha financeira completa com Resumo, Movimentações, Atendimentos, A receber, Serviços, Categorias e Fluxo mensal. Caixa, categorias e meses respeitam os filtros de data, tipo e categoria; agenda e valores a receber usam todos os atendimentos das datas escolhidas. Saldos de atendimento consideram pagamentos/reembolsos acumulados de todas as datas. Custos ausentes ficam em branco, e estimativas ativas não incluem cancelamentos/ausências. O arquivo é gerado localmente, sem alterar registros ou enviar dados para conversão.
